@@ -1,6 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const dbConnection = require('./src/db');
+const router = require('./routes');
 
 // Loading environment variables
 dotenv.config();
@@ -11,6 +12,7 @@ const app = express();
 
 // Middleware for parsing json data
 app.use(express.json());
+app.use(router);
 
 // Establishing connection with database
 async function main() {
