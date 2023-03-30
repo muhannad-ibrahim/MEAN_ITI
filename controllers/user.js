@@ -27,39 +27,7 @@ const getAllUsers = async (req, res) => {
     }
 };
 
-const getUserById = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id);
-        res.json(user);
-    } catch (error) {
-        res.json(error.message);
-    }
-};
-
-const updateUserById = async (req, res) => {
-    try {
-        const { body: { firstName, lastName, email } } = req;
-        const user = await User.findByIdAndUpdate(req.params.id, { firstName, lastName, email });
-        res.json(user);
-    } catch (error) {
-        res.json(error.message);
-    }
-};
-
-const deleteUserById = async (req, res) => {
-    try {
-        console.log('dd');
-        const user = await User.findByIdAndRemove(req.params.id);
-        res.send(user);
-    } catch (error) {
-        res.json(error.message);
-    }
-};
-
 module.exports = {
     create,
     getAllUsers,
-    getUserById,
-    updateUserById,
-    deleteUserById,
 };
