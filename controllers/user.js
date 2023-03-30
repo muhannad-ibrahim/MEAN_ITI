@@ -46,9 +46,20 @@ const updateUserById = async (req, res) => {
     }
 };
 
+const deleteUserById = async (req, res) => {
+    try {
+        console.log('dd');
+        const user = await User.findByIdAndRemove(req.params.id);
+        res.send(user);
+    } catch (error) {
+        res.json(error.message);
+    }
+};
+
 module.exports = {
     create,
     getAllUsers,
     getUserById,
     updateUserById,
+    deleteUserById,
 };
