@@ -30,4 +30,6 @@ const getAllUsers = async (req, res) => {
 module.exports = {
     create,
     getAllUsers,
+    getUserById,
+    updateUserById,
 };
