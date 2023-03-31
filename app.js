@@ -1,7 +1,12 @@
+/* eslint-disable import/order */
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const dbConnection = require('./src/db');
+const router = require('./src/routes');
+
+// connecting with cluster MongoDB
+// const MongoDB = require('mongodb').MongoClient;
 const router = require('./src/routes');
 
 // Loading environment variables
@@ -23,6 +28,7 @@ app.use(cors(corsOptions));
 
 // Establishing connection with database
 async function main() {
+    console.log(process.env.MONGO_URI);
     try {
         await dbConnection(process.env.MONGO_URI);
     } catch (error) {
