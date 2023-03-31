@@ -1,9 +1,9 @@
+/* eslint-disable import/no-unresolved */
 /* eslint-disable import/order */
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const dbConnection = require('./src/db');
-const router = require('./src/routes');
 
 // connecting with cluster MongoDB
 // const MongoDB = require('mongodb').MongoClient;
