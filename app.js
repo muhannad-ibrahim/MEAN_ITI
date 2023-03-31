@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const dotenv = require('dotenv');
 const dbConnection = require('./src/db');
 const router = require('./src/routes');
@@ -13,6 +14,12 @@ const app = express();
 // Middleware for parsing json data
 app.use(express.json());
 app.use(router);
+
+const corsOptions = {
+    origin: 'http://localhost:4200',
+};
+
+app.use(cors(corsOptions));
 
 // Establishing connection with database
 async function main() {
