@@ -2,21 +2,18 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 const { query } = require('express');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-const create = async (req, res, next) => {
+const JWT_SECRET = process.env.JWT_SECRET || 'test';
+
+const signup = async (req, res, next) => {
     const user = new User({
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         email: req.body.email,
         password: req.body.password,
     });
-    // try {
-    //     const result = await User.insertOne(user).exec();
-    //     res.json(result);
-    // } catch (error) {
-    //     res.json({ message: error.message });
-    // }
     user.save()
         .then((savedUser) => {
             res.json({ message: 'success', savedUser });
@@ -64,10 +61,22 @@ const deleteUserById = async (req, res) => {
     }
 };
 
+const login = async (req, res, next) => {
+    const { body: { email, password } } = req;
+    const user = await User.findOne({ email }).exec();
+    const valid = user.verifyPassword(password);
+    if (!valid) {
+        res.json({ message: 'UNAuthenticated to login' });
+    }
+    const token = jwt.sign({ email, id: user.id }, JWT_SECRET, { expiresIn: '4h' });
+    res.json({ message: 'success', token });
+};
+
 module.exports = {
-    create,
+    signup,
     getAllUsers,
     getUserById,
     updateUserById,
     deleteUserById,
+    login,
 };
