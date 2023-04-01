@@ -25,8 +25,14 @@ const signup = async (req, res, next) => {
 };
 
 const getAllUsers = async (req, res) => {
+    const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
+    const pageSize = parseInt(req.query.pageSize, 10) || 6;
     try {
-        const users = await User.find().exec();
+        const users = await User
+            .find()
+            .skip((pageNumber) * pageSize)
+            .limit(pageSize)
+            .exec();
         res.json(users);
     } catch (error) {
         res.json(error);
