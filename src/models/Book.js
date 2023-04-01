@@ -9,10 +9,17 @@ const bookSchema = new mongoose.Schema({
     categoryId: {
         type: mongoose.Types.ObjectId,
         ref: 'Category',
+        required: [true, 'Please enter a category'],
     },
     AuthorId: {
         type: mongoose.Types.ObjectId,
         ref: 'Author',
+        required: [true, 'Please enter an author'],
+    },
+    shelve: {
+        type: String,
+        enum: ['Read', 'Reading', 'Want to read'],
+        default: 'Want to read',
     },
     photo: {
         type: String,

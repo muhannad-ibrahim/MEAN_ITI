@@ -2,6 +2,7 @@
 /* eslint-disable import/order */
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const dbConnection = require('./src/db');
 
@@ -19,6 +20,7 @@ const app = express();
 // Middleware for parsing json data
 app.use(express.json());
 app.use(router);
+app.use(cookieParser());
 
 const corsOptions = {
     origin: 'http://localhost:4200',

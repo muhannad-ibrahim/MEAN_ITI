@@ -35,6 +35,11 @@ const userSchema = new mongoose.Schema({
     photo: {
         type: String,
     },
+    role: {
+        type: String,
+        enum: ['admin', 'user'],
+        default: 'user',
+    },
 }, {
     toJSON: {
         transform(doc, ret) {

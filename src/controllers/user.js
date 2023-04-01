@@ -13,6 +13,7 @@ const signup = async (req, res, next) => {
         lastName: req.body.lastName,
         email: req.body.email,
         password: req.body.password,
+        role: req.body.role,
     });
     user.save()
         .then((savedUser) => {
@@ -69,6 +70,8 @@ const login = async (req, res, next) => {
         res.json({ message: 'UNAuthenticated to login' });
     }
     const token = jwt.sign({ email, id: user.id }, JWT_SECRET, { expiresIn: '4h' });
+    res.cookie('jwt', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 4 });
+
     res.json({ message: 'success', token });
 };
 
