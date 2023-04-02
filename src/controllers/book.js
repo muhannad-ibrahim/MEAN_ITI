@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 /* eslint-disable no-undef */
 const Book = require('../models/Book');
 const checkRole = require('../middleware/checkRole');
@@ -49,10 +50,13 @@ const updateBookById = async (req, res) => {
     }
     try {
         const { body: { name } } = req;
-        const book = await Book.findOneAndUpdate(req.body.id, { name });
-        res.json({ message: 'success', book });
+        const book = await Book.findOneAndUpdate({ name: req.params.name }, { name });
+        if (!book) {
+            return res.status(404).json({ message: 'Book not found' });
+        }
+        res.json({ message: 'succes', cate });
     } catch (error) {
-        res.json(error.message);
+        res.json({ message: 'error', error });
     }
 };
 
@@ -61,13 +65,16 @@ const deleteBookById = async (req, res) => {
         res.json({ message: 'error', error: 'you are not admin' });
     }
     try {
-        const book = await Book.findByIdAndRemove(req.params.id);
-        res.send({ message: 'success', book });
+        const book = await Book.findOne({ name: req.body.name }).exec();
+        if (!book) {
+            return res.status(404).json({ message: 'Book not found' });
+        }
+        await Book.findByIdAndRemove(req.params.id);
+        res.send({ message: 'success' });
     } catch (error) {
         res.json(error.message);
     }
 };
-
 module.exports = {
     createBook,
     getAllBooks,
