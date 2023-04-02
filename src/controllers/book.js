@@ -49,7 +49,7 @@ const updateBookById = async (req, res) => {
     }
     try {
         const { body: { name } } = req;
-        const book = await Book.findByIdAndUpdate(req.params.id, { name });
+        const book = await Book.findOneAndUpdate(req.body.id, { name });
         res.json({ message: 'success', book });
     } catch (error) {
         res.json(error.message);
