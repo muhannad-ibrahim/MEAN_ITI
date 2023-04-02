@@ -4,6 +4,7 @@
 const { query } = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const checkRole = require('../middleware/checkRole');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'test';
 
@@ -14,6 +15,7 @@ const signup = async (req, res, next) => {
         email: req.body.email,
         password: req.body.password,
         role: req.body.role,
+        photo: req.file.filename,
     });
     user.save()
         .then((savedUser) => {
@@ -25,14 +27,11 @@ const signup = async (req, res, next) => {
 };
 
 const getAllUsers = async (req, res) => {
-    const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
-    const pageSize = parseInt(req.query.pageSize, 10) || 6;
+    if (!checkRole.isAdmin(req)) {
+        res.json({ message: 'error', error: 'You are not an admin' });
+    }
     try {
-        const users = await User
-            .find()
-            .skip((pageNumber) * pageSize)
-            .limit(pageSize)
-            .exec();
+        const users = await User.find().exec();
         res.json(users);
     } catch (error) {
         res.json(error);
@@ -40,6 +39,9 @@ const getAllUsers = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
+    if (!checkRole.isAdmin(req)) {
+        res.json({ message: 'error', error: 'You are not an admin' });
+    }
     try {
         const user = await User.findById(req.params.id);
         res.json(user);
@@ -49,9 +51,18 @@ const getUserById = async (req, res) => {
 };
 
 const updateUserById = async (req, res) => {
+    if (!checkRole.isAdmin(req)) {
+        res.json({ message: 'error', error: 'You are not an admin' });
+    }
     try {
-        const { body: { firstName, lastName, email } } = req;
-        const user = await User.findByIdAndUpdate(req.params.id, { firstName, lastName, email });
+        const {
+            body: {
+                firstName, lastName, email, role,
+            },
+        } = req;
+        const user = await User.findByIdAndUpdate(req.params.id, {
+            firstName, lastName, email, role,
+        });
         res.json(user);
     } catch (error) {
         res.json(error.message);
@@ -59,6 +70,9 @@ const updateUserById = async (req, res) => {
 };
 
 const deleteUserById = async (req, res) => {
+    if (!checkRole.isAdmin(req)) {
+        res.json({ message: 'error', error: 'You are not an admin' });
+    }
     try {
         console.log('dd');
         const user = await User.findByIdAndRemove(req.params.id);
@@ -73,9 +87,9 @@ const login = async (req, res, next) => {
     const user = await User.findOne({ email }).exec();
     const valid = user.verifyPassword(password);
     if (!valid) {
-        res.json({ message: 'UNAuthenticated to login' });
+        res.json({ message: 'error', error: 'UNAUTHENTICATED to login' });
     }
-    const token = jwt.sign({ email, id: user.id }, JWT_SECRET, { expiresIn: '4h' });
+    const token = jwt.sign({ email, id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '4h' });
     res.cookie('jwt', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 4 });
 
     res.json({ message: 'success', token });

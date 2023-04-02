@@ -1,10 +1,22 @@
+/* eslint-disable no-undef */
 const router = require('express').Router();
+const multer = require('multer');
+const path = require('path');
 const { userController } = require('../controllers');
-
 /* eslint-disable comma-dangle */
 
+// multer to sorage image
+const storage = multer.diskStorage({
+    destination: './src/images',
+    filename: (req, file, cb) => cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
+});
+
+const upload = multer({
+    storage
+});
+
 router.get('/', userController.getAllUsers);
-router.post('/signup', userController.signup);
+router.post('/signup', upload.single('photo'), userController.signup);
 router.post('/login', userController.login);
 router.get('/:id', userController.getUserById);
 router.patch('/:id', userController.updateUserById);
