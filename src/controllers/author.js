@@ -30,7 +30,7 @@ const createAuthor = async (req, res) => {
     author.save().then((savedAuthor) => {
         res.json({ message: 'success', savedAuthor });
     }).catch((error) => {
-        res.json({ message: 'error', error });
+        res.json({ message: error.message });
     });
 };
 
@@ -56,7 +56,7 @@ const updateAuthorById = async (req, res) => {
         author.save().then((savedAuthor) => {
             res.json({ message: 'success', savedAuthor });
         }).catch((error) => {
-            res.json({ message: 'error', error });
+            res.json({ message: error.message });
         });
     } catch (error) {
         res.json(error.message);
@@ -72,7 +72,7 @@ const deleteAuthorById = async (req, res) => {
         author.remove().then((removedAuthor) => {
             res.json({ message: 'success', removedAuthor });
         }).catch((error) => {
-            res.json({ message: 'error', error });
+            res.json({ message: error.message });
         });
     } catch (error) {
         res.json(error.message);

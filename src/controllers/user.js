@@ -27,9 +27,6 @@ const signup = async (req, res, next) => {
 };
 
 const getAllUsers = async (req, res) => {
-    if (!checkRole.isAdmin(req)) {
-        res.json({ message: 'error', error: 'You are not an admin' });
-    }
     try {
         const users = await User.find().exec();
         res.json(users);
@@ -39,9 +36,6 @@ const getAllUsers = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
-    if (!checkRole.isAdmin(req)) {
-        res.json({ message: 'error', error: 'You are not an admin' });
-    }
     try {
         const user = await User.findById(req.params.id);
         res.json(user);
