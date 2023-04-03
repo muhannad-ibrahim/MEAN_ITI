@@ -1,8 +1,10 @@
 const router = require('express').Router();
 const multer = require('multer');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 const { bookController } = require('../controllers');
 
+router.use(cookieParser());
 /* eslint-disable comma-dangle */
 
 const storage = multer.diskStorage({

@@ -21,8 +21,11 @@ const updateCategory = async (req, res) => {
         res.json({ message: 'error', error: 'you are not admin' });
     }
     try {
-        const { body: { name } } = req;
-        const cate = await Category.findOneAndUpdate({ name: req.params.name }, { name });
+        // const { body: { name } } = req;
+        const cate = await Category.findOneAndUpdate(
+            { name: req.params.name },
+            { name: req.body.name },
+        );
         if (!cate) {
             return res.status(404).json({ message: 'Category not found' });
         }

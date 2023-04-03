@@ -2,7 +2,10 @@
 const router = require('express').Router();
 const multer = require('multer');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 const { userController } = require('../controllers');
+
+router.use(cookieParser());
 /* eslint-disable comma-dangle */
 
 // multer to sorage image
