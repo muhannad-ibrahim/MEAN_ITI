@@ -30,7 +30,6 @@ app.use(cors(corsOptions));
 
 // Establishing connection with database
 async function main() {
-    console.log(process.env.MONGO_URI);
     try {
         await dbConnection(process.env.MONGO_URI);
     } catch (error) {

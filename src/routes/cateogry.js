@@ -3,7 +3,9 @@ const cookieParser = require('cookie-parser');
 const { categoryController } = require('../controllers');
 
 router.use(cookieParser());
+
 router.post('/', categoryController.createCategory);
+router.get('/', categoryController.getAllCategories);
 router.patch('/:name', categoryController.updateCategory);
 router.delete('/', categoryController.deleteCategory);
 

@@ -17,7 +17,7 @@ const createCategory = (req, res) => {
 };
 
 const updateCategory = async (req, res) => {
-    if (!checkRole.isAdmin(req)) {
+    if (!checkRole.isAdmin(req, res)) {
         res.json({ message: 'error', error: 'you are not admin' });
     }
     try {
@@ -50,8 +50,20 @@ const deleteCategory = async (req, res) => {
         res.json(error.message);
     }
 };
+const getAllCategories = async (req, res) => {
+    try {
+        const cate = await Category.find().exec();
+        if (!cate) {
+            return res.status(404).json({ message: 'there is no categories' });
+        }
+        res.json({ message: 'success', cate });
+    } catch (error) {
+        res.json(error.message);
+    }
+};
 
 module.exports = {
+    getAllCategories,
     createCategory,
     updateCategory,
     deleteCategory,
