@@ -9,9 +9,6 @@ const hpp = require('hpp');
 const dotenv = require('dotenv');
 const dbConnection = require('./src/db');
 
-const corsOptions = {
-    origin: 'http://localhost:4200',
-};
 // connecting with cluster MongoDB
 // const MongoDB = require('mongodb').MongoClient;
 const router = require('./src/routes');
@@ -22,6 +19,12 @@ const port = process.env.PORT;
 
 // Creating express app
 const app = express();
+
+// Middleware for CORS policy
+const corsOptions = {
+    origin: 'http://localhost:4200',
+};
+app.use(cors(corsOptions));
 
 // Middleware for parsing json data
 app.use(express.json());
@@ -37,12 +40,8 @@ app.use(helmet());
 // Prevent http param pollution
 app.use(hpp());
 
-// Middleware for CORS policy
-app.use(cors(corsOptions));
-
 // Establishing connection with database
 async function main() {
-    console.log(process.env.MONGO_URI);
     try {
         await dbConnection(process.env.MONGO_URI);
     } catch (error) {
