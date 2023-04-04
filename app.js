@@ -3,6 +3,9 @@
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+const hpp = require('hpp');
 const dotenv = require('dotenv');
 const dbConnection = require('./src/db');
 
@@ -17,16 +20,29 @@ const port = process.env.PORT;
 // Creating express app
 const app = express();
 
+// Middleware for CORS policy
+const corsOptions = {
+    credentials: true,
+    origin: 'http://localhost:4200',
+};
+app.use(cors(corsOptions));
+
+// Middleware for parsing urlencoded data
+app.use(express.static('images'));
+
 // Middleware for parsing json data
 app.use(express.json());
 app.use(router);
 app.use(cookieParser());
 
-const corsOptions = {
-    origin: 'http://localhost:4200',
-};
+// Middleware for sanitizing data against NoSQL query injection
+app.use(mongoSanitize());
 
-app.use(cors(corsOptions));
+// Middleware for setting security HTTP headers
+app.use(helmet());
+
+// Prevent http param pollution
+app.use(hpp());
 
 // Establishing connection with database
 async function main() {
