@@ -3,9 +3,15 @@
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+const hpp = require('hpp');
 const dotenv = require('dotenv');
 const dbConnection = require('./src/db');
 
+const corsOptions = {
+    origin: 'http://localhost:4200',
+};
 // connecting with cluster MongoDB
 // const MongoDB = require('mongodb').MongoClient;
 const router = require('./src/routes');
@@ -22,10 +28,16 @@ app.use(express.json());
 app.use(router);
 app.use(cookieParser());
 
-const corsOptions = {
-    origin: 'http://localhost:4200',
-};
+// Middleware for sanitizing data against NoSQL query injection
+app.use(mongoSanitize());
 
+// Middleware for setting security HTTP headers
+app.use(helmet());
+
+// Prevent http param pollution
+app.use(hpp());
+
+// Middleware for CORS policy
 app.use(cors(corsOptions));
 
 // Establishing connection with database
