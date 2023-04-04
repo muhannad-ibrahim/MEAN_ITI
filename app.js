@@ -22,6 +22,7 @@ const app = express();
 
 // Middleware for CORS policy
 const corsOptions = {
+    credentials: true,
     origin: 'http://localhost:4200',
 };
 app.use(cors(corsOptions));
