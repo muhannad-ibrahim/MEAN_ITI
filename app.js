@@ -26,6 +26,9 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+// Middleware for parsing urlencoded data
+app.use(express.static('images'));
+
 // Middleware for parsing json data
 app.use(express.json());
 app.use(router);

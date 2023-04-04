@@ -10,8 +10,8 @@ router.use(cookieParser());
 
 // multer to sorage image
 const storage = multer.diskStorage({
-    destination: './src/images',
-    filename: (req, file, cb) => cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
+    destination: './images',
+    filename: (req, file, cb) => cb(null, `user_${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
 });
 
 const upload = multer({

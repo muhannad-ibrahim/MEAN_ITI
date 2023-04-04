@@ -9,13 +9,14 @@ const checkRole = require('../middleware/checkRole');
 const JWT_SECRET = process.env.JWT_SECRET || 'test';
 
 const signup = async (req, res, next) => {
+    const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
     const user = new User({
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         email: req.body.email,
         password: req.body.password,
         role: req.body.role,
-        photo: req.file.filename,
+        photo: imageURL,
     });
     user.save()
         .then((savedUser) => {

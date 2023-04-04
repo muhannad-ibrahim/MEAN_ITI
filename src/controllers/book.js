@@ -22,11 +22,12 @@ const createBook = async (req, res) => {
     if (!checkRole.isAdmin(req)) {
         res.json({ message: 'error', error: 'you are not admin' });
     }
+    const imageURL = `${req.protocol}://${req.headers.host}/bookImg/${req.file.filename}`;
     const book = await new Book({
         name: req.body.name,
         categoryId: req.body.categoryId,
         AuthorId: req.body.AuthorId,
-        photo: req.file.filename,
+        photo: imageURL,
     });
     book.save().then((savedBook) => {
         res.json({ message: 'success', savedBook });

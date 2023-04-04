@@ -20,7 +20,7 @@ const createAuthor = async (req, res) => {
     if (!checkRole.isAdmin(req)) {
         res.json({ message: 'error', error: 'You are not an admin' });
     }
-    const imageURL = `${req.protocol}://${req.headers.host}/${req.file.destination}/${req.file.filename}`;
+    const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
     const author = await new Author({
         firstName: req.body.firstName,
         lastName: req.body.lastName,
