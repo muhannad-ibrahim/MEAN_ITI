@@ -91,9 +91,14 @@ const login = async (req, res, next) => {
         res.json({ message: 'error', error: 'UNAUTHENTICATED to login' });
     }
     const token = jwt.sign({ email, id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '4h' });
-    res.cookie('jwt', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 4 });
+    res.cookie('jwt', token, { maxAge: 1000 * 60 * 60 * 4 });
 
     res.json({ message: 'success' });
+};
+
+const logout = async (req, res, next) => {
+    res.clearCookie('cookie_name');
+    res.redirect('/');
 };
 
 module.exports = {
@@ -103,4 +108,5 @@ module.exports = {
     updateUserById,
     deleteUserById,
     login,
+    logout,
 };
