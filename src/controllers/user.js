@@ -109,6 +109,30 @@ const login = async (req, res) => {
     res.json({ message: 'success' });
 };
 
+const getUserProfile = async (req, res) => {
+    try {
+        const cookie = req.cookies.jwt;
+
+        const payload = jwt.verify(cookie, JWT_SECRET);
+
+        if (!payload) {
+            return res.status(401).send({
+                message: 'unauthenticated',
+            });
+        }
+
+        const user = await User.findOne({ email: payload.email });
+
+        const { password, ...data } = await user.toJSON();
+
+        return res.send(data);
+    } catch (e) {
+        return res.status(401).send({
+            message: 'unauthenticated',
+        });
+    }
+};
+
 const logout = async (req, res) => {
     res.clearCookie('cookie_name');
     res.redirect('/');
@@ -120,6 +144,7 @@ module.exports = {
     getUserById,
     updateUserById,
     deleteUserById,
+    getUserProfile,
     login,
     logout,
 };
