@@ -32,10 +32,17 @@ const getAllUsers = async (req, res) => {
         res.json({ message: 'error', error: 'You are not an admin' });
     }
     try {
-        const users = await User.find().exec();
-        res.json(users);
+        const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
+        const pageSize = parseInt(req.query.pageSize, 10) || 6;
+        const users = await User
+            .find()
+            .skip((pageNumber) * pageSize)
+            .limit(pageSize)
+            .exec();
+        const usersCount = await User.countDocuments();
+        res.json({ data: users, total: usersCount });
     } catch (error) {
-        res.json(error);
+        res.json(error.message);
     }
 };
 
@@ -91,7 +98,7 @@ const login = async (req, res, next) => {
         res.json({ message: 'error', error: 'UNAUTHENTICATED to login' });
     }
     const token = jwt.sign({ email, id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '4h' });
-    res.cookie('jwt', token, { maxAge: 1000 * 60 * 60 * 4 });
+    res.cookie('jwt', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 4 });
 
     res.json({ message: 'success' });
 };
