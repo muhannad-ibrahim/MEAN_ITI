@@ -25,5 +25,6 @@ router.get('/logout', userController.logout);
 router.get('/:id', userController.getUserById);
 router.patch('/:id', userController.updateUserById);
 router.delete('/:id', userController.deleteUserById);
+router.getUserProfie('/profile', userController.getUserProfie);
 
 module.exports = router;
