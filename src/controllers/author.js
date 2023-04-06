@@ -2,17 +2,18 @@ const Author = require('../models/Author');
 const checkRole = require('../middleware/checkRole');
 
 const getAllAuthors = async (req, res) => {
-    const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
-    const pageSize = parseInt(req.query.pageSize, 10) || 6;
     try {
+        const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
+        const pageSize = parseInt(req.query.pageSize, 10) || 6;
         const authors = await Author
             .find()
             .skip((pageNumber) * pageSize)
             .limit(pageSize)
             .exec();
-        res.json(authors);
+        const authorsCount = await Author.countDocuments();
+        res.json({ data: authors, total: authorsCount });
     } catch (error) {
-        res.json(error);
+        res.json(error.message);
     }
 };
 

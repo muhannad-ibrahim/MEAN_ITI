@@ -2,6 +2,25 @@
 const Category = require('../models/Category');
 const checkRole = require('../middleware/checkRole');
 
+const getAllCategories = async (req, res) => {
+    try {
+        const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
+        const pageSize = parseInt(req.query.pageSize, 10) || 6;
+        const categories = await Category
+            .find()
+            .skip((pageNumber) * pageSize)
+            .limit(pageSize)
+            .exec();
+        const categoryCount = await Category.countDocuments();
+        if (!categories) {
+            return res.status(404).json({ message: 'there is no categories' });
+        }
+        res.json({ data: categories, total: categoryCount });
+    } catch (error) {
+        res.json(error.message);
+    }
+};
+
 const createCategory = (req, res) => {
     if (!checkRole.isAdmin(req)) {
         res.json({ message: 'error', error: 'you are not admin' });
@@ -46,17 +65,6 @@ const deleteCategory = async (req, res) => {
         }
         await Category.findByIdAndRemove(req.params.id);
         res.send({ message: 'success' });
-    } catch (error) {
-        res.json(error.message);
-    }
-};
-const getAllCategories = async (req, res) => {
-    try {
-        const cate = await Category.find().exec();
-        if (!cate) {
-            return res.status(404).json({ message: 'there is no categories' });
-        }
-        res.json({ message: 'success', cate });
     } catch (error) {
         res.json(error.message);
     }

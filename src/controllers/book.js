@@ -4,17 +4,18 @@ const Book = require('../models/Book');
 const checkRole = require('../middleware/checkRole');
 
 const getAllBooks = async (req, res) => {
-    const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
-    const pageSize = parseInt(req.query.pageSize, 10) || 6;
     try {
+        const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
+        const pageSize = parseInt(req.query.pageSize, 10) || 6;
         const books = await Book
             .find()
             .skip((pageNumber) * pageSize)
             .limit(pageSize)
             .exec();
-        res.json(books);
+        const booksCount = await Book.countDocuments();
+        res.json({ data: books, total: booksCount });
     } catch (error) {
-        res.json(error);
+        res.json(error.message);
     }
 };
 

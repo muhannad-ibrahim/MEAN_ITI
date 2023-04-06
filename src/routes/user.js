@@ -21,6 +21,7 @@ const upload = multer({
 router.get('/', userController.getAllUsers);
 router.post('/signup', upload.single('photo'), userController.signup);
 router.post('/login', userController.login);
+router.get('/logout', userController.logout);
 router.get('/:id', userController.getUserById);
 router.patch('/:id', userController.updateUserById);
 router.delete('/:id', userController.deleteUserById);
