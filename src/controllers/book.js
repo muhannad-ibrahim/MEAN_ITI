@@ -66,15 +66,19 @@ const deleteBookById = async (req, res) => {
     if (!checkRole.isAdmin(req)) {
         res.json({ message: 'error', error: 'you are not admin' });
     }
-    try {
-        const book = await Book.findOne({ name: req.body.name }).exec();
-        if (!book) {
-            return res.status(404).json({ message: 'Book not found' });
+    const book = await Book.findByIdAndRemove(req.params.id);
+    if (!book) {
+        res.json({ message: 'error', error: 'Author not found' });
+    } else {
+        const filename = book.photo.split('/').pop();
+        const path = './images/bookImg/';
+        if (fs.existsSync(path + filename)) {
+            console.log('file exists');
+            fs.unlinkSync(path + filename);
+        } else {
+            console.log('file not found!');
         }
-        await Book.findByIdAndRemove(req.params.id);
-        res.send({ message: 'success' });
-    } catch (error) {
-        res.json(error.message);
+        res.json({ message: 'success', book });
     }
 };
 module.exports = {

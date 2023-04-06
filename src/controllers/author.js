@@ -1,3 +1,5 @@
+// eslint-disable-next-line no-unused-vars
+const fs = require('fs');
 const Author = require('../models/Author');
 const checkRole = require('../middleware/checkRole');
 
@@ -18,7 +20,7 @@ const getAllAuthors = async (req, res) => {
 };
 
 const createAuthor = async (req, res) => {
-    if (!checkRole.isAdmin(req)) {
+    if (!checkRole.isAdmin(req, res)) {
         res.json({ message: 'error', error: 'You are not an admin' });
     }
     const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
@@ -45,7 +47,7 @@ const getAuthorById = async (req, res) => {
 };
 
 const updateAuthorById = async (req, res) => {
-    if (!checkRole.isAdmin(req)) {
+    if (!checkRole.isAdmin(req, res)) {
         res.json({ message: 'error', error: 'You are not an admin' });
     }
     try {
@@ -65,18 +67,22 @@ const updateAuthorById = async (req, res) => {
 };
 
 const deleteAuthorById = async (req, res) => {
-    if (!checkRole.isAdmin(req)) {
+    if (!checkRole.isAdmin(req, res)) {
         res.json({ message: 'error', error: 'You are not an admin' });
     }
-    try {
-        const author = await Author.findById(req.params.id);
-        author.remove().then((removedAuthor) => {
-            res.json({ message: 'success', removedAuthor });
-        }).catch((error) => {
-            res.json({ message: error.message });
-        });
-    } catch (error) {
-        res.json(error.message);
+    const author = await Author.findByIdAndRemove(req.params.id);
+    if (!author) {
+        res.json({ message: 'error', error: 'Author not found' });
+    } else {
+        const filename = author.photo.split('/').pop();
+        const path = './images/';
+        if (fs.existsSync(path + filename)) {
+            console.log('file exists');
+            fs.unlinkSync(path + filename);
+        } else {
+            console.log('file not found!');
+        }
+        res.json({ message: 'success', author });
     }
 };
 
