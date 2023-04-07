@@ -59,12 +59,11 @@ const deleteCategory = async (req, res) => {
         res.json({ message: 'error', error: 'you are not admin' });
     }
     try {
-        const cate = await Category.findOne({ name: req.body.name }).exec();
+        const cate = await Category.findByIdAndRemove(req.params.id);
         if (!cate) {
             return res.status(404).json({ message: 'Category not found' });
         }
-        await Category.findByIdAndRemove(req.params.id);
-        res.send({ message: 'success' });
+        res.json({ message: 'success', cate });
     } catch (error) {
         res.json(error.message);
     }
