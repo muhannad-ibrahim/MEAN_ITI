@@ -7,6 +7,6 @@ router.use(cookieParser());
 router.post('/', categoryController.createCategory);
 router.get('/', categoryController.getAllCategories);
 router.patch('/:name', categoryController.updateCategory);
-router.delete('/', categoryController.deleteCategory);
+router.delete('/:id', categoryController.deleteCategory);
 
 module.exports = router;
