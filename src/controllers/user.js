@@ -18,8 +18,8 @@ const signup = async (req, res) => {
         photo: imageURL,
     });
     user.save()
-        .then((savedUser) => {
-            res.json({ message: 'success', savedUser });
+        .then(() => {
+            res.json({ message: 'success' });
         })
         .catch((error) => {
             res.json({ message: error.message });
