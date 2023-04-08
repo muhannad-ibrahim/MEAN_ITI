@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable consistent-return */
 const Category = require('../models/Category');
 const checkRole = require('../middleware/checkRole');
@@ -41,13 +42,17 @@ const updateCategory = async (req, res) => {
     }
     try {
         // const { body: { name } } = req;
-        const cate = await Category.findOneAndUpdate(req.params.id);
+        // const { body: { name } } = req;
+        // const catId = req.params.id
+        const cate = await Category.findByIdAndUpdate(req.params.id, { name: req.body.name }, { new: true });
+        console.log(req.body.name);
         if (!cate) {
             return res.status(404).json({ message: 'Category not found' });
         }
         res.json({ message: 'succes', cate });
     } catch (error) {
-        res.json({ message: 'error', error });
+        console.log('dddddd');
+        res.json({ message: 'error', error: error.message });
     }
 };
 

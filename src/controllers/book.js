@@ -52,11 +52,11 @@ const updateBookById = async (req, res) => {
     }
     try {
         const { body: { name } } = req;
-        const book = await Book.findOneAndUpdate({ name: req.params.name }, { name });
+        const book = await Book.findOneAndUpdate(req.params.id, { name });
         if (!book) {
             return res.status(404).json({ message: 'Book not found' });
         }
-        res.json({ message: 'succes', cate });
+        res.json({ message: 'succes', book });
     } catch (error) {
         res.json({ message: 'error', error });
     }
