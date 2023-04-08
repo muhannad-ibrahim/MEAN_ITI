@@ -24,6 +24,10 @@ const bookSchema = new mongoose.Schema({
     photo: {
         type: String,
     },
+    rating: {
+        type: Number,
+        min: 0,
+    },
 }, {
     timestamps: true,
 });
