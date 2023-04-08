@@ -41,10 +41,7 @@ const updateCategory = async (req, res) => {
     }
     try {
         // const { body: { name } } = req;
-        const cate = await Category.findOneAndUpdate(
-            { name: req.params.name },
-            { name: req.body.name },
-        );
+        const cate = await Category.findOneAndUpdate(req.params.id);
         if (!cate) {
             return res.status(404).json({ message: 'Category not found' });
         }
