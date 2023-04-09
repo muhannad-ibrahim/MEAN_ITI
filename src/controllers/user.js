@@ -147,14 +147,17 @@ const deleteUserById = async (req, res) => {
 const login = async (req, res) => {
     const { body: { email, password } } = req;
     const user = await User.findOne({ email }).exec();
+    if (!user) {
+        return res.json({ message: 'error', error: 'user does\'t exist' });
+    }
     const valid = user.verifyPassword(password);
     if (!valid) {
-        res.json({ message: 'error', error: 'UNAUTHENTICATED to login' });
+        return res.json({ message: 'error', error: 'UNAUTHENTICATED to login' });
     }
     const token = jwt.sign({ email, id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '4h' });
     res.cookie('jwt', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 4 });
 
-    res.json({ message: 'success' });
+    return res.json({ message: 'success' });
 };
 
 const getUserProfile = async (req, res) => {
