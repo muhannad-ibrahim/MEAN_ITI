@@ -71,6 +71,10 @@ const getUserBooks = async (req, res) => {
             .populate({
                 path: 'books.bookId',
                 select: 'name AuthorId photo rating',
+                populate: {
+                    path: 'AuthorId',
+                    select: 'firstName',
+                },
             })
             .skip((pageNumber) * pageSize)
             .limit(pageSize)
