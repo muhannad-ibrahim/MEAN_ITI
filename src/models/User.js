@@ -42,6 +42,12 @@ const userSchema = new mongoose.Schema({
     books: [
         {
             bookId: { type: mongoose.ObjectId, ref: 'Book', required: true },
+            rating: {
+                type: Number,
+                min: 0,
+                max: 5,
+                default: 0,
+            },
             shelve: {
                 type: String,
                 enum: ['Read', 'Reading', 'Want to read'],
