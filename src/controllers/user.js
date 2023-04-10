@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /* eslint-disable radix */
 /* eslint-disable consistent-return */
 // eslint-disable-next-line no-unused-vars
@@ -142,8 +144,13 @@ const getUserProfile = async (req, res) => {
 };
 
 const logout = async (req, res) => {
-    res.clearCookie('cookie_name');
-    res.redirect('/');
+    res.clearCookie('jwt');
+
+    res.redirect('/login');
+};
+
+const displayLogoutMessage = async (req, res) => {
+    res.send('logout successfully');
 };
 
 module.exports = {
@@ -155,4 +162,5 @@ module.exports = {
     getUserProfile,
     login,
     logout,
+    displayLogoutMessage,
 };
