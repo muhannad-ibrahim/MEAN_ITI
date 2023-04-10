@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePagination = require('mongoose-paginate-v2');
 
 const bookSchema = new mongoose.Schema({
     name: {
@@ -33,6 +34,8 @@ const bookSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
+
+bookSchema.plugin(mongoosePagination);
 
 const Book = mongoose.model('Book', bookSchema);
 

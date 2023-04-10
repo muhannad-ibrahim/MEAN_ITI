@@ -2,6 +2,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-undef */
 const mongoose = require('mongoose');
+const mongoosePagination = require('mongoose-paginate-v2');
 const bcrypt = require('bcrypt');
 const { isEmail } = require('validator');
 
@@ -63,6 +64,7 @@ const userSchema = new mongoose.Schema({
         },
     },
 });
+userSchema.plugin(mongoosePagination);
 
 userSchema.pre('save', function preSave(next) {
     this.password = bcrypt.hashSync(this.password, 10);
