@@ -20,7 +20,7 @@ const upload = multer({
 
 // router.get('/books', userController.getUserBooks);
 router.get('/profile', userController.getUserProfile);
-router.get('/logout', userController.logout);
+router.get('/logout', userController.logout, userController.displayLogoutMessage);
 router.get('/', userController.getAllUsers);
 router.get('/:id', userController.getUserById);
 router.post('/signup', upload.single('photo'), userController.signup);

@@ -18,8 +18,8 @@ const getAllCategories = async (req, res) => {
 };
 
 const getCategoriesPagination = async (req, res) => {
-    const currentPage = req.query.page || 1;
-    const itemPerPage = req.query.size || 5;
+    const currentPage = parseInt(req.query.page) || 1;
+    const itemPerPage = 5;
     try {
         const categories = await Category.paginate({}, { page: currentPage, limit: itemPerPage });
         if (categories.docs.length === 0) {
