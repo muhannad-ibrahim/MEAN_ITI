@@ -11,6 +11,20 @@ const checkRole = require('../middleware/checkRole');
 
 const getAllAuthors = async (req, res) => {
     try {
+        const authors = await Author.find({});
+        if (authors.length === 0) {
+            return res.status(404).json({ message: 'there is no authors' });
+        }
+        res.json({
+            message: 'success',
+            data: authors,
+        });
+    } catch (error) {
+        res.json(error.message);
+    }
+};
+const getAuthorsPagination = async (req, res) => {
+    try {
         const authorperPage = 5;
         const currentPage = parseInt(req.query.page) || 1;
         const authors = await Author.paginate({}, { page: currentPage, limit: authorperPage });
@@ -104,4 +118,5 @@ module.exports = {
     getAuthorById,
     updateAuthorById,
     deleteAuthorById,
+    getAuthorsPagination,
 };

@@ -5,8 +5,20 @@ const Category = require('../models/Category');
 const checkRole = require('../middleware/checkRole');
 
 const getAllCategories = async (req, res) => {
-    const itemPerPage = 5;
+    try {
+        const categories = await Category.find({});
+        if (categories.length === 0) {
+            return res.status(404).json({ message: 'there is no categories' });
+        }
+        res.json({ message: 'success', data: categories });
+    } catch (error) {
+        res.json({ message: 'error', error: error.message });
+    }
+};
+
+const getCategoriesPagination = async (req, res) => {
     const currentPage = req.query.page || 1;
+    const itemPerPage = req.query.size || 5;
     try {
         const categories = await Category.paginate({}, { page: currentPage, limit: itemPerPage });
         if (categories.docs.length === 0) {
@@ -80,4 +92,5 @@ module.exports = {
     createCategory,
     updateCategory,
     deleteCategory,
+    getCategoriesPagination,
 };
