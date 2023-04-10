@@ -1,3 +1,4 @@
+/* eslint-disable radix */
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-len */
 /* eslint-disable consistent-return */
@@ -6,7 +7,7 @@ const checkRole = require('../middleware/checkRole');
 
 const getAllCategories = async (req, res) => {
     const itemPerPage = 5;
-    const currentPage = req.query.page || 1;
+    const currentPage = parseInt(req.query.page) || 1;
     try {
         const categories = await Category.paginate({}, { page: currentPage, limit: itemPerPage });
         if (categories.docs.length === 0) {

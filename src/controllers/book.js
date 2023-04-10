@@ -1,19 +1,26 @@
+/* eslint-disable radix */
 /* eslint-disable consistent-return */
 /* eslint-disable no-undef */
 const Book = require('../models/Book');
 const checkRole = require('../middleware/checkRole');
 
 const getAllBooks = async (req, res) => {
+    const itemPerPage = 5;
+    const currentPage = parseInt(req.query.page) || 1;
     try {
-        const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
-        const pageSize = parseInt(req.query.pageSize, 10) || 6;
-        const books = await Book
-            .find()
-            .skip((pageNumber) * pageSize)
-            .limit(pageSize)
-            .exec();
-        const booksCount = await Book.countDocuments();
-        res.json({ data: books, total: booksCount });
+        const books = await Book.paginate({}, { page: currentPage, limit: itemPerPage });
+        if (books.docs.length === 0) {
+            return res.status(404).json({ message: 'there is no books' });
+        }
+        res.json({
+            message: 'success',
+            data: books.docs,
+            pages: books.totalPages,
+            currentPage: books.page,
+            nextPage: books.hasNextPage ? books.nextPage : null,
+            prevPage: books.hasPrevPage ? books.prevPage : null,
+
+        });
     } catch (error) {
         res.json(error.message);
     }
