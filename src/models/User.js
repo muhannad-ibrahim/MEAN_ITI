@@ -30,7 +30,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         minLength: 4,
-        maxLength: 10,
     },
     photo: {
         type: String,
@@ -40,6 +39,22 @@ const userSchema = new mongoose.Schema({
         enum: ['admin', 'user'],
         default: 'user',
     },
+    books: [
+        {
+            bookId: { type: mongoose.ObjectId, ref: 'Book', required: true },
+            rating: {
+                type: Number,
+                min: 0,
+                max: 5,
+                default: 0,
+            },
+            shelve: {
+                type: String,
+                enum: ['Read', 'Reading', 'Want to read'],
+                default: 'Want to read',
+            },
+        },
+    ],
 }, {
     toJSON: {
         transform(doc, ret) {
