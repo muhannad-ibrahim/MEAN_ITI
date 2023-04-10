@@ -17,6 +17,11 @@ const authorSchema = new mongoose.Schema({
     dob: {
         type: Date,
     },
+    bio: {
+        type: String,
+        maxLength: 150,
+        minLength: 20,
+    },
 }, {
     timestamps: true,
 });
