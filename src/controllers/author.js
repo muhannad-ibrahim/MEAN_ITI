@@ -1,3 +1,9 @@
+/* eslint-disable radix */
+/* eslint-disable consistent-return */
+/* eslint-disable eqeqeq */
+/* eslint-disable no-undef */
+/* eslint-disable max-len */
+/* eslint-disable no-unused-vars */
 // eslint-disable-next-line no-unused-vars
 const fs = require('fs');
 const Author = require('../models/Author');
@@ -5,15 +11,21 @@ const checkRole = require('../middleware/checkRole');
 
 const getAllAuthors = async (req, res) => {
     try {
-        const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
-        const pageSize = parseInt(req.query.pageSize, 10) || 6;
-        const authors = await Author
-            .find()
-            .skip((pageNumber) * pageSize)
-            .limit(pageSize)
-            .exec();
-        const authorsCount = await Author.countDocuments();
-        res.json({ data: authors, total: authorsCount });
+        const authorperPage = 5;
+        const currentPage = parseInt(req.query.page) || 1;
+        const authors = await Author.paginate({}, { page: currentPage, limit: authorperPage });
+        if (authors.docs.length === 0) {
+            return res.status(404).json({ message: 'there is no authors' });
+        }
+        res.json({
+            message: 'success',
+            data: authors.docs,
+            pages: authors.totalPages,
+            currentPage: authors.page,
+            nextPage: authors.hasNextPage ? authors.nextPage : null,
+            prevPage: authors.hasPrevPage ? authors.prevPage : null,
+
+        });
     } catch (error) {
         res.json(error.message);
     }

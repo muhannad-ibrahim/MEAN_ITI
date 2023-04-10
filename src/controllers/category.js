@@ -1,24 +1,28 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable max-len */
 /* eslint-disable consistent-return */
 const Category = require('../models/Category');
 const checkRole = require('../middleware/checkRole');
 
 const getAllCategories = async (req, res) => {
+    const itemPerPage = 5;
+    const currentPage = req.query.page || 1;
     try {
-        const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
-        const pageSize = parseInt(req.query.pageSize, 10) || 6;
-        const categories = await Category
-            .find()
-            .skip((pageNumber) * pageSize)
-            .limit(pageSize)
-            .exec();
-        const categoryCount = await Category.countDocuments();
-        if (!categories) {
+        const categories = await Category.paginate({}, { page: currentPage, limit: itemPerPage });
+        if (categories.docs.length === 0) {
             return res.status(404).json({ message: 'there is no categories' });
         }
-        res.json({ data: categories, total: categoryCount });
+        res.json({
+            message: 'success',
+            data: categories.docs,
+            pages: categories.totalPages,
+            currentPage: categories.page,
+            nextPage: categories.hasNextPage ? categories.nextPage : null,
+            prevPage: categories.hasPrevPage ? categories.prevPage : null,
+
+        });
     } catch (error) {
-        res.json(error.message);
+        res.json({ message: 'error', error: error.message });
     }
 };
 
