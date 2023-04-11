@@ -109,6 +109,9 @@ const deleteUserById = async (req, res) => {
 const login = async (req, res) => {
     const { body: { email, password } } = req;
     const user = await User.findOne({ email }).exec();
+    if (!user) {
+        res.json({ message: 'error', error: 'User not found' });
+    }
     const valid = user.verifyPassword(password);
     if (!valid) {
         res.json({ message: 'error', error: 'UNAUTHENTICATED to login' });
@@ -145,8 +148,6 @@ const getUserProfile = async (req, res) => {
 
 const logout = async (req, res) => {
     res.clearCookie('jwt');
-
-    res.redirect('/login');
 };
 
 const displayLogoutMessage = async (req, res) => {
