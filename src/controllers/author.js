@@ -1,3 +1,9 @@
+/* eslint-disable radix */
+/* eslint-disable consistent-return */
+/* eslint-disable eqeqeq */
+/* eslint-disable no-undef */
+/* eslint-disable max-len */
+/* eslint-disable no-unused-vars */
 // eslint-disable-next-line no-unused-vars
 const fs = require('fs');
 const Author = require('../models/Author');
@@ -6,23 +12,43 @@ const checkRole = require('../middleware/checkRole');
 
 const getAllAuthors = async (req, res) => {
     try {
-        const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
-        const pageSize = parseInt(req.query.pageSize, 10) || 6;
-        const authors = await Author
-            .find()
-            .skip((pageNumber) * pageSize)
-            .limit(pageSize)
-            .exec();
-        const authorsCount = await Author.countDocuments();
-        res.json({ data: authors, total: authorsCount });
+        const authors = await Author.find({});
+        if (authors.length === 0) {
+            return res.status(404).json({ message: 'there is no authors' });
+        }
+        return res.json({
+            message: 'success',
+            data: authors,
+        });
     } catch (error) {
-        res.json(error.message);
+        return res.json(error.message);
+    }
+};
+const getAuthorsPagination = async (req, res) => {
+    try {
+        const authorperPage = 5;
+        const currentPage = parseInt(req.query.page) || 1;
+        const authors = await Author.paginate({}, { page: currentPage, limit: authorperPage });
+        if (authors.docs.length === 0) {
+            return res.status(404).json({ message: 'there is no authors' });
+        }
+        return res.json({
+            message: 'success',
+            data: authors.docs,
+            pages: authors.totalPages,
+            currentPage: authors.page,
+            nextPage: authors.hasNextPage ? authors.nextPage : null,
+            prevPage: authors.hasPrevPage ? authors.prevPage : null,
+
+        });
+    } catch (error) {
+        return res.json(error.message);
     }
 };
 
 const createAuthor = async (req, res) => {
     if (!checkRole.isAdmin(req, res)) {
-        res.json({ message: 'error', error: 'You are not an admin' });
+        return res.json({ message: 'error', error: 'You are not an admin' });
     }
     const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
     const author = await new Author({
@@ -32,19 +58,16 @@ const createAuthor = async (req, res) => {
         dob: req.body.dob,
         bio: req.body.bio,
     });
-    author.save().then((savedAuthor) => {
-        res.json({ message: 'success', savedAuthor });
-    }).catch((error) => {
-        res.json({ message: error.message });
-    });
+    author.save().then((savedAuthor) => res.json({ message: 'success', savedAuthor }))
+        .catch((error) => res.json({ message: error.message }));
 };
 
 const getAuthorById = async (req, res) => {
     try {
         const author = await Author.findById(req.params.id);
-        res.json({ message: 'success', author });
+        return res.json({ message: 'success', author });
     } catch (error) {
-        res.json(error.message);
+        return res.json(error.message);
     }
 };
 const getAllAuthorsBooks = async (req, res) => {
@@ -58,7 +81,7 @@ const getAllAuthorsBooks = async (req, res) => {
 
 const updateAuthorById = async (req, res) => {
     if (!checkRole.isAdmin(req, res)) {
-        res.json({ message: 'error', error: 'You are not an admin' });
+        return res.json({ message: 'error', error: 'You are not an admin' });
     }
     try {
         const author = await Author.findById(req.params.id);
@@ -72,29 +95,30 @@ const updateAuthorById = async (req, res) => {
         }).catch((error) => {
             res.json({ message: error.message });
         });
+        author.save().then((savedAuthor) => res.json({ message: 'success', savedAuthor }))
+            .catch((error) => res.json({ message: error.message }));
     } catch (error) {
-        res.json(error.message);
+        return res.json(error.message);
     }
 };
 
 const deleteAuthorById = async (req, res) => {
     if (!checkRole.isAdmin(req, res)) {
-        res.json({ message: 'error', error: 'You are not an admin' });
+        return res.json({ message: 'error', error: 'You are not an admin' });
     }
     const author = await Author.findByIdAndRemove(req.params.id);
     if (!author) {
-        res.json({ message: 'error', error: 'Author not found' });
-    } else {
-        const filename = author.photo.split('/').pop();
-        const path = './images/';
-        if (fs.existsSync(path + filename)) {
-            console.log('file exists');
-            fs.unlinkSync(path + filename);
-        } else {
-            console.log('file not found!');
-        }
-        res.json({ message: 'success', author });
+        return res.json({ message: 'error', error: 'Author not found' });
     }
+    const filename = author.photo.split('/').pop();
+    const path = './images/';
+    if (fs.existsSync(path + filename)) {
+        console.log('file exists');
+        fs.unlinkSync(path + filename);
+    } else {
+        console.log('file not found!');
+    }
+    return res.json({ message: 'success', author });
 };
 
 module.exports = {
@@ -103,5 +127,6 @@ module.exports = {
     getAuthorById,
     updateAuthorById,
     deleteAuthorById,
+    getAuthorsPagination,
     getAllAuthorsBooks,
 };

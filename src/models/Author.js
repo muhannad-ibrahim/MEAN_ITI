@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePagination = require('mongoose-paginate-v2');
 
 const authorSchema = new mongoose.Schema({
     firstName: {
@@ -25,6 +26,8 @@ const authorSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
+
+authorSchema.plugin(mongoosePagination);
 
 const Author = mongoose.model('Author', authorSchema);
 

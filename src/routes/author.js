@@ -17,7 +17,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 /* eslint-disable comma-dangle */
-router.get('/', authorController.getAllAuthors);
+router.get('/', authorController.getAuthorsPagination);
+router.get('/all', authorController.getAllAuthors);
+
 router.post('/', upload.single('photo'), authorController.createAuthor);
 router.get('/:AuthorId', authorController.getAllAuthorsBooks);
 router.get('/:id', authorController.getAuthorById);
