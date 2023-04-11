@@ -4,4 +4,5 @@ module.exports = {
     bookController: require('./book'),
     authorController: require('./author'),
     categoryController: require('./category'),
+    userBookController: require('./userBook'),
 };
