@@ -1,0 +1,45 @@
+/* eslint-disable no-unused-vars */
+const mongoose = require('mongoose');
+const mongoosePagination = require('mongoose-paginate-v2');
+
+const reviewSchemma = new mongoose.Schema({
+    reviewerName: {
+        type: String,
+        required: true,
+    },
+    comment: {
+        type: String,
+        required: true,
+
+    },
+    rate: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 5,
+    },
+    shelve: {
+        type: String,
+        enum: ['want to read', 'read', 'current read'],
+        default: 'want to read',
+    },
+});
+
+const userBookSchema = new mongoose.Schema({
+
+    UserId: {
+        type: mongoose.Types.ObjectId,
+        ref: 'User',
+    },
+    bookId: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Book',
+    },
+
+    reviews: [reviewSchemma],
+
+});
+
+userBookSchema.plugin(mongoosePagination);
+
+module.exports = mongoose.model('UserBook', userBookSchema);
