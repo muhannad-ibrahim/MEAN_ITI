@@ -2,6 +2,7 @@
 /* eslint-disable no-undef */
 const Book = require('../models/Book');
 const checkRole = require('../middleware/checkRole');
+// const Category = require('../models/Category');
 
 const getAllBooks = async (req, res) => {
     try {

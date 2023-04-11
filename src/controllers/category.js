@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 /* eslint-disable consistent-return */
 const Category = require('../models/Category');
+const Book = require('../models/Book');
 const checkRole = require('../middleware/checkRole');
 
 const getAllCategories = async (req, res) => {
@@ -21,7 +22,6 @@ const getAllCategories = async (req, res) => {
         res.json(error.message);
     }
 };
-
 const createCategory = (req, res) => {
     if (!checkRole.isAdmin(req)) {
         res.json({ message: 'error', error: 'you are not admin' });
@@ -45,7 +45,6 @@ const updateCategory = async (req, res) => {
         // const { body: { name } } = req;
         // const catId = req.params.id
         const cate = await Category.findByIdAndUpdate(req.params.id, { name: req.body.name }, { new: true });
-        console.log(req.body.name);
         if (!cate) {
             return res.status(404).json({ message: 'Category not found' });
         }
@@ -70,10 +69,22 @@ const deleteCategory = async (req, res) => {
         res.json(error.message);
     }
 };
+const getAllBooksByCategoryId = async (req, res) => {
+    try {
+        const books = await Book.find({ categoryId: req.params.categoryId }).populate({
 
+            path: 'AuthorId',
+            select: 'firstName',
+        }).exec();
+        res.json({ data: books });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 module.exports = {
     getAllCategories,
     createCategory,
     updateCategory,
     deleteCategory,
+    getAllBooksByCategoryId,
 };

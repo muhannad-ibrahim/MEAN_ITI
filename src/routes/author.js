@@ -19,6 +19,7 @@ const upload = multer({ storage });
 /* eslint-disable comma-dangle */
 router.get('/', authorController.getAllAuthors);
 router.post('/', upload.single('photo'), authorController.createAuthor);
+router.get('/:AuthorId', authorController.getAllAuthorsBooks);
 router.get('/:id', authorController.getAuthorById);
 router.patch('/:id', authorController.updateAuthorById);
 router.delete('/:id', authorController.deleteAuthorById);

@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 const fs = require('fs');
 const Author = require('../models/Author');
+const Book = require('../models/Book');
 const checkRole = require('../middleware/checkRole');
 
 const getAllAuthors = async (req, res) => {
@@ -29,6 +30,7 @@ const createAuthor = async (req, res) => {
         lastName: req.body.lastName,
         photo: imageURL,
         dob: req.body.dob,
+        bio: req.body.bio,
     });
     author.save().then((savedAuthor) => {
         res.json({ message: 'success', savedAuthor });
@@ -45,6 +47,14 @@ const getAuthorById = async (req, res) => {
         res.json(error.message);
     }
 };
+const getAllAuthorsBooks = async (req, res) => {
+    try {
+        const books = await Book.find({ AuthorId: req.params.AuthorId }).exec();
+        res.json({ data: books });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 const updateAuthorById = async (req, res) => {
     if (!checkRole.isAdmin(req, res)) {
@@ -56,6 +66,7 @@ const updateAuthorById = async (req, res) => {
         author.lastName = req.body.lastName;
         author.photo = req.body.photo;
         author.dob = req.body.dob;
+        author.bio = req.body.bio;
         author.save().then((savedAuthor) => {
             res.json({ message: 'success', savedAuthor });
         }).catch((error) => {
@@ -92,4 +103,5 @@ module.exports = {
     getAuthorById,
     updateAuthorById,
     deleteAuthorById,
+    getAllAuthorsBooks,
 };
