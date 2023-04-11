@@ -101,4 +101,5 @@ module.exports = {
     updateCategory,
     deleteCategory,
     getCategoriesPagination,
+    getAllBooksByCategoryId,
 };

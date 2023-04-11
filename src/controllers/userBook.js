@@ -12,7 +12,6 @@ const create = (req, res) => {
         reviews: [
             { reviewerName: 'user1', comment: 'Great book!', rate: 5 },
             { reviewerName: 'user2', comment: 'I enjoyed it.', rate: 4 },
-            { reviewerName: 'user3', comment: 'A classic.', rate: 5 },
         ],
     });
     userBook.save()
@@ -26,6 +25,12 @@ const create = (req, res) => {
         });
 };
 
+const getAlluserBooks = async (req, res) => {
+    const userBooks = await UserBook.find();
+    res.json(userBooks);
+};
+
 module.exports = {
     create,
+    getAlluserBooks,
 };
