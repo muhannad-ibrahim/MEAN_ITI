@@ -22,17 +22,13 @@ const signup = async (req, res) => {
         photo: imageURL,
     });
     user.save()
-        .then(() => {
-            res.json({ message: 'success' });
-        })
-        .catch((error) => {
-            res.json({ message: error.message });
-        });
+        .then(() => res.json({ message: 'success' }))
+        .catch((error) => res.json({ message: error.message }));
 };
 
 const getAllUsers = async (req, res) => {
     if (!checkRole.isAdmin(req)) {
-        res.json({ message: 'error', error: 'You are not an admin' });
+        return res.json({ message: 'error', error: 'You are not an admin' });
     }
     const itemPerPage = 5;
     const currentPage = parseInt(req.query.page) || 1;
@@ -51,25 +47,25 @@ const getAllUsers = async (req, res) => {
 
         });
     } catch (error) {
-        res.json(error.message);
+        return res.json(error.message);
     }
 };
 
 const getUserById = async (req, res) => {
     if (!checkRole.isAdmin(req)) {
-        res.json({ message: 'error', error: 'You are not an admin' });
+        return res.json({ message: 'error', error: 'You are not an admin' });
     }
     try {
         const user = await User.findById(req.params.id);
-        res.json(user);
+        return res.json(user);
     } catch (error) {
-        res.json(error.message);
+        return res.json(error.message);
     }
 };
 
 const updateUserById = async (req, res) => {
     if (!checkRole.isAdmin(req)) {
-        res.json({ message: 'error', error: 'You are not an admin' });
+        return res.json({ message: 'error', error: 'You are not an admin' });
     }
     try {
         const {
@@ -80,30 +76,29 @@ const updateUserById = async (req, res) => {
         const user = await User.findByIdAndUpdate(req.params.id, {
             firstName, lastName, email, role,
         });
-        res.json(user);
+        return res.json(user);
     } catch (error) {
-        res.json(error.message);
+        return res.json(error.message);
     }
 };
 
 const deleteUserById = async (req, res) => {
     if (!checkRole.isAdmin(req)) {
-        res.json({ message: 'error', error: 'You are not an admin' });
+        return res.json({ message: 'error', error: 'You are not an admin' });
     }
     const user = await User.findByIdAndRemove(req.params.id);
     if (!user) {
-        res.json({ message: 'error', error: 'Author not found' });
-    } else {
-        const filename = user.photo.split('/').pop();
-        const path = './images/';
-        if (fs.existsSync(path + filename)) {
-            console.log('file exists');
-            fs.unlinkSync(path + filename);
-        } else {
-            console.log('file not found!');
-        }
-        res.json({ message: 'success', user });
+        return res.json({ message: 'error', error: 'Author not found' });
     }
+    const filename = user.photo.split('/').pop();
+    const path = './images/';
+    if (fs.existsSync(path + filename)) {
+        console.log('file exists');
+        fs.unlinkSync(path + filename);
+    } else {
+        console.log('file not found!');
+    }
+    return res.json({ message: 'success', user });
 };
 
 const login = async (req, res) => {
@@ -136,7 +131,7 @@ const getUserProfile = async (req, res) => {
 
         const user = await User.findOne({ email: payload.email });
 
-        const { password, ...data } = await user.toJSON();
+        const { _id, ...data } = await user.toJSON();
 
         return res.send(data);
     } catch (e) {
@@ -146,9 +141,7 @@ const getUserProfile = async (req, res) => {
     }
 };
 
-const logout = async (req, res) => {
-    res.clearCookie('jwt');
-};
+const logout = async (req, res) => res.clearCookie('jwt');
 
 const displayLogoutMessage = async (req, res) => {
     res.send('logout successfully');

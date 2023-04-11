@@ -15,12 +15,12 @@ const getAllAuthors = async (req, res) => {
         if (authors.length === 0) {
             return res.status(404).json({ message: 'there is no authors' });
         }
-        res.json({
+        return res.json({
             message: 'success',
             data: authors,
         });
     } catch (error) {
-        res.json(error.message);
+        return res.json(error.message);
     }
 };
 const getAuthorsPagination = async (req, res) => {
@@ -31,7 +31,7 @@ const getAuthorsPagination = async (req, res) => {
         if (authors.docs.length === 0) {
             return res.status(404).json({ message: 'there is no authors' });
         }
-        res.json({
+        return res.json({
             message: 'success',
             data: authors.docs,
             pages: authors.totalPages,
@@ -41,13 +41,13 @@ const getAuthorsPagination = async (req, res) => {
 
         });
     } catch (error) {
-        res.json(error.message);
+        return res.json(error.message);
     }
 };
 
 const createAuthor = async (req, res) => {
     if (!checkRole.isAdmin(req, res)) {
-        res.json({ message: 'error', error: 'You are not an admin' });
+        return res.json({ message: 'error', error: 'You are not an admin' });
     }
     const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
     const author = await new Author({
@@ -56,25 +56,22 @@ const createAuthor = async (req, res) => {
         photo: imageURL,
         dob: req.body.dob,
     });
-    author.save().then((savedAuthor) => {
-        res.json({ message: 'success', savedAuthor });
-    }).catch((error) => {
-        res.json({ message: error.message });
-    });
+    author.save().then((savedAuthor) => res.json({ message: 'success', savedAuthor }))
+        .catch((error) => res.json({ message: error.message }));
 };
 
 const getAuthorById = async (req, res) => {
     try {
         const author = await Author.findById(req.params.id);
-        res.json({ message: 'success', author });
+        return res.json({ message: 'success', author });
     } catch (error) {
-        res.json(error.message);
+        return res.json(error.message);
     }
 };
 
 const updateAuthorById = async (req, res) => {
     if (!checkRole.isAdmin(req, res)) {
-        res.json({ message: 'error', error: 'You are not an admin' });
+        return res.json({ message: 'error', error: 'You are not an admin' });
     }
     try {
         const author = await Author.findById(req.params.id);
@@ -82,34 +79,30 @@ const updateAuthorById = async (req, res) => {
         author.lastName = req.body.lastName;
         author.photo = req.body.photo;
         author.dob = req.body.dob;
-        author.save().then((savedAuthor) => {
-            res.json({ message: 'success', savedAuthor });
-        }).catch((error) => {
-            res.json({ message: error.message });
-        });
+        author.save().then((savedAuthor) => res.json({ message: 'success', savedAuthor }))
+            .catch((error) => res.json({ message: error.message }));
     } catch (error) {
-        res.json(error.message);
+        return res.json(error.message);
     }
 };
 
 const deleteAuthorById = async (req, res) => {
     if (!checkRole.isAdmin(req, res)) {
-        res.json({ message: 'error', error: 'You are not an admin' });
+        return res.json({ message: 'error', error: 'You are not an admin' });
     }
     const author = await Author.findByIdAndRemove(req.params.id);
     if (!author) {
-        res.json({ message: 'error', error: 'Author not found' });
-    } else {
-        const filename = author.photo.split('/').pop();
-        const path = './images/';
-        if (fs.existsSync(path + filename)) {
-            console.log('file exists');
-            fs.unlinkSync(path + filename);
-        } else {
-            console.log('file not found!');
-        }
-        res.json({ message: 'success', author });
+        return res.json({ message: 'error', error: 'Author not found' });
     }
+    const filename = author.photo.split('/').pop();
+    const path = './images/';
+    if (fs.existsSync(path + filename)) {
+        console.log('file exists');
+        fs.unlinkSync(path + filename);
+    } else {
+        console.log('file not found!');
+    }
+    return res.json({ message: 'success', author });
 };
 
 module.exports = {
