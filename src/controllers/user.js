@@ -178,7 +178,10 @@ const getUserProfile = async (req, res, next) => {
     return res.send(data);
 };
 
-const logout = async (req, res) => res.clearCookie('jwt');
+const logout = async (req, res) => {
+    res.clearCookie('jwt');
+    res.redirect('/user/login');
+};
 
 const displayLogoutMessage = async (req, res) => res.send('logout successfully');
 
