@@ -33,6 +33,14 @@ app.use(express.static('images'));
 // Middleware for parsing json data
 app.use(express.json());
 app.use(router);
+app.use((err, req, res, next) => {
+    res.status(400).json(
+        {
+            message: err.message,
+        },
+    );
+    next();
+});
 app.use(cookieParser());
 
 // Middleware for sanitizing data against NoSQL query injection
