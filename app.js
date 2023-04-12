@@ -34,7 +34,7 @@ app.use(express.static('images'));
 // Middleware for parsing json data
 app.use(express.json());
 app.use(router);
-app.use((err, req, res, next) => res.status(400 || 500).json(
+app.use((err, req, res, next) => res.status(err.statusCode || 400).json(
     {
         message: err.message,
     },
