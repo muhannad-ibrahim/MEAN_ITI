@@ -1,8 +1,14 @@
+/* eslint-disable max-len */
 /* eslint-disable consistent-return */
 /* eslint-disable radix */
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
+const jwt = require('jsonwebtoken');
 const UserBook = require('../models/userBooks');
+const Book = require('../models/Book');
+const User = require('../models/User');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'test';
 
 const create = (req, res) => {
     const userBook = new UserBook({
@@ -21,21 +27,24 @@ const create = (req, res) => {
 };
 
 const getUserBooks = async (req, res) => {
+    console.log('ddddd');
     const currentPage = parseInt(req.query.page) || 1;
     const itemPerPage = 5;
     try {
         const token = req.cookies.jwt;
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-        const users = await UserBook.paginate({}, { page: currentPage, limit: itemPerPage })
-            .findById(decodedToken.id)
-            .populate({
-                path: 'books.bookId',
-                select: 'name AuthorId photo rating',
-                populate: {
-                    path: 'AuthorId',
-                    select: 'firstName',
-                },
-            });
+        const users = await UserBook.paginate({ UserId: decodedToken.id }, { page: currentPage, limit: itemPerPage });
+        console.log(users.docs);
+        console.log(decodedToken.id);
+        const populateUsers = await UserBook.populate(users.docs, {
+            path: 'books.bookId',
+            select: 'name AuthorId photo rating',
+            populate: {
+                path: 'AuthorId',
+                select: 'firstName',
+            },
+        });
+        console.log(populateUsers);
         return res.json({
             message: 'success',
             data: users.docs,
@@ -72,8 +81,18 @@ const addBookToUser = async (req, res) => {
     }
 };
 
+const updatePushBook = (req, res) => {
+    const token = req.cookies.jwt;
+    const payLoad = jwt.verify(token, process.env.JWT_SECRET);
+    const idBook = req.query.id;
+    const rateBook = req.body.rate;
+    const shelveBook = req.body.shelve;
+    const commentBook = req.body.comment;
+};
+
 module.exports = {
     create,
     getUserBooks,
     addBookToUser,
+    updatePushBook,
 };
