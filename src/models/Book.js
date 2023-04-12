@@ -17,10 +17,13 @@ const bookSchema = new mongoose.Schema({
         ref: 'Author',
         required: [true, 'Please enter an author'],
     },
-    shelve: {
-        type: String,
-        enum: ['Read', 'Reading', 'Want to read'],
-        default: 'Want to read',
+    totalRate: {
+        type: Number,
+        default: 0,
+    },
+    raringNumber: {
+        type: Number,
+        default: 0,
     },
     photo: {
         type: String,

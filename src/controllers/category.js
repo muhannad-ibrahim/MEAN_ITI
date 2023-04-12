@@ -33,7 +33,6 @@ const getCategoriesPagination = async (req, res) => {
             currentPage: categories.page,
             nextPage: categories.hasNextPage ? categories.nextPage : null,
             prevPage: categories.hasPrevPage ? categories.prevPage : null,
-
         });
     } catch (error) {
         return res.json({ message: 'error', error: error.message });

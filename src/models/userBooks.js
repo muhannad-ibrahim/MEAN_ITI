@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const mongoosePagination = require('mongoose-paginate-v2');
 
 const reviewSchemma = new mongoose.Schema({
-    reviewerName: {
-        type: String,
-        required: true,
+    bookId: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Book',
     },
     comment: {
         type: String,
@@ -31,12 +31,8 @@ const userBookSchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: 'User',
     },
-    bookId: {
-        type: mongoose.Types.ObjectId,
-        ref: 'Book',
-    },
 
-    reviews: [reviewSchemma],
+    books: [reviewSchemma],
 
 });
 
