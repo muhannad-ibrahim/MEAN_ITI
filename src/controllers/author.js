@@ -22,7 +22,7 @@ const getAllAuthors = async (req, res, next) => {
         }
         return res.json({ message: 'success', data: authors });
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        return next(error);
     }
 };
 
@@ -46,7 +46,7 @@ const getAuthorsPagination = async (req, res, next) => {
             prevPage: authors.hasPrevPage ? authors.prevPage : null,
         });
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        return next(error);
     }
 };
 
@@ -70,7 +70,7 @@ const createAuthor = async (req, res, next) => {
         }
         return res.json({ message: 'success', data: savedAuthor });
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        return next(error);
     }
 };
 
@@ -82,7 +82,7 @@ const getAuthorById = async (req, res, next) => {
         }
         return res.json({ message: 'success', data: author });
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        return next(error);
     }
 };
 
@@ -95,7 +95,7 @@ const getAllAuthorsBooks = async (req, res, next) => {
         }
         return res.json({ data: books });
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        return next(error);
     }
 };
 
@@ -119,7 +119,7 @@ const updateAuthorById = async (req, res) => {
         author.save().then((savedAuthor) => res.json({ message: 'success', savedAuthor }))
             .catch((error) => res.json({ message: error.message }));
     } catch (error) {
-        return res.json(error.message);
+        return next(error);
     }
 };
 
@@ -143,7 +143,7 @@ const deleteAuthorById = async (req, res, next) => {
         }
         return res.json({ message: 'success', data: author });
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        return next(error);
     }
 };
 
