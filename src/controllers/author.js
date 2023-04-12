@@ -99,25 +99,28 @@ const getAllAuthorsBooks = async (req, res, next) => {
     }
 };
 
-const updateAuthorById = async (req, res) => {
+const updateAuthorById = async (req, res, next) => {
     const isUserAdmin = await checkRole.isAdmin(req);
     if (!isUserAdmin) {
         return res.status(401).json({ message: 'You are not an admin' });
     }
+
     try {
         const author = await Author.findById(req.params.id);
-        author.firstName = req.body.firstName;
-        author.lastName = req.body.lastName;
-        author.photo = req.body.photo;
-        author.dob = req.body.dob;
-        author.bio = req.body.bio;
-        author.save().then((savedAuthor) => {
-            res.json({ message: 'success', savedAuthor });
-        }).catch((error) => {
-            res.json({ message: error.message });
-        });
-        author.save().then((savedAuthor) => res.json({ message: 'success', savedAuthor }))
-            .catch((error) => res.json({ message: error.message }));
+        author.firstName = req.body.firstName || author.firstName;
+        author.lastName = req.body.lastName || author.lastName;
+        author.photo = req.body.photo || author.photo;
+        author.dob = req.body.dob || author.dob;
+        author.bio = req.body.bio || author.bio;
+
+        const promise = author.save();
+        const [err, savedAuthor] = await asyncWrapper(promise);
+
+        if (err) {
+            return next(err);
+        }
+
+        return res.json({ message: 'success', savedAuthor });
     } catch (error) {
         return next(error);
     }
