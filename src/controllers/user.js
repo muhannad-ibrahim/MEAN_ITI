@@ -27,8 +27,9 @@ const signup = async (req, res) => {
 };
 
 const getAllUsers = async (req, res) => {
-    if (!checkRole.isAdmin(req)) {
-        return res.json({ message: 'error', error: 'You are not an admin' });
+    const isUserAdmin = await checkRole.isAdmin(req);
+    if (!isUserAdmin) {
+        return res.status(401).json({ message: 'You are not an admin' });
     }
     const itemPerPage = 5;
     const currentPage = parseInt(req.query.page) || 1;
@@ -52,8 +53,9 @@ const getAllUsers = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
-    if (!checkRole.isAdmin(req)) {
-        return res.json({ message: 'error', error: 'You are not an admin' });
+    const isUserAdmin = await checkRole.isAdmin(req);
+    if (!isUserAdmin) {
+        return res.status(401).json({ message: 'You are not an admin' });
     }
     try {
         const user = await User.findById(req.params.id);
@@ -64,8 +66,9 @@ const getUserById = async (req, res) => {
 };
 
 const updateUserById = async (req, res) => {
-    if (!checkRole.isAdmin(req)) {
-        return res.json({ message: 'error', error: 'You are not an admin' });
+    const isUserAdmin = await checkRole.isAdmin(req);
+    if (!isUserAdmin) {
+        return res.status(401).json({ message: 'You are not an admin' });
     }
     try {
         const {
@@ -83,8 +86,9 @@ const updateUserById = async (req, res) => {
 };
 
 const deleteUserById = async (req, res) => {
-    if (!checkRole.isAdmin(req)) {
-        return res.json({ message: 'error', error: 'You are not an admin' });
+    const isUserAdmin = await checkRole.isAdmin(req);
+    if (!isUserAdmin) {
+        return res.status(401).json({ message: 'You are not an admin' });
     }
     const user = await User.findByIdAndRemove(req.params.id);
     if (!user) {
@@ -143,9 +147,7 @@ const getUserProfile = async (req, res) => {
 
 const logout = async (req, res) => res.clearCookie('jwt');
 
-const displayLogoutMessage = async (req, res) => {
-    res.send('logout successfully');
-};
+const displayLogoutMessage = async (req, res) => res.send('logout successfully');
 
 const getUserBooks = async (req, res) => {
     try {
@@ -167,9 +169,9 @@ const getUserBooks = async (req, res) => {
             .limit(pageSize)
             .exec();
         const usersCount = await User.countDocuments();
-        res.json({ data: users, total: usersCount });
+        return res.json({ data: users, total: usersCount });
     } catch (error) {
-        res.json(error.message);
+        return res.json(error.message);
     }
 };
 
@@ -189,10 +191,10 @@ const addBookToUser = async (req, res) => {
         user.books.push({ bookId });
         // Save the user's changes
         await user.save();
-        res.status(200).json({ message: 'Book added to user successfully' });
+        return res.status(200).json({ message: 'Book added to user successfully' });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error adding book to user' });
+        return res.status(500).json({ message: 'Error adding book to user' });
     }
 };
 

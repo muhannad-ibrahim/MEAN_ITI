@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable import/order */
 const express = require('express');
@@ -33,6 +34,11 @@ app.use(express.static('images'));
 // Middleware for parsing json data
 app.use(express.json());
 app.use(router);
+app.use((err, req, res, next) => res.status(400 || 500).json(
+    {
+        message: err.message,
+    },
+));
 app.use(cookieParser());
 
 // Middleware for sanitizing data against NoSQL query injection
