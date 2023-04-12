@@ -40,9 +40,10 @@ const getCategoriesPagination = async (req, res) => {
     }
 };
 
-const createCategory = (req, res) => {
-    if (!checkRole.isAdmin(req)) {
-        return res.json({ message: 'error', error: 'you are not admin' });
+const createCategory = async (req, res) => {
+    const isUserAdmin = await checkRole.isAdmin(req);
+    if (!isUserAdmin) {
+        return res.status(401).json({ message: 'You are not an admin' });
     }
     const category = new Category({
         name: req.body.name,
@@ -52,8 +53,9 @@ const createCategory = (req, res) => {
 };
 
 const updateCategory = async (req, res) => {
-    if (!checkRole.isAdmin(req, res)) {
-        return res.json({ message: 'error', error: 'you are not admin' });
+    const isUserAdmin = await checkRole.isAdmin(req);
+    if (!isUserAdmin) {
+        return res.status(401).json({ message: 'You are not an admin' });
     }
     try {
         // const { body: { name } } = req;
@@ -70,8 +72,9 @@ const updateCategory = async (req, res) => {
 };
 
 const deleteCategory = async (req, res) => {
-    if (!checkRole.isAdmin(req)) {
-        return res.json({ message: 'error', error: 'you are not admin' });
+    const isUserAdmin = await checkRole.isAdmin(req);
+    if (!isUserAdmin) {
+        return res.status(401).json({ message: 'You are not an admin' });
     }
     try {
         const cate = await Category.findByIdAndRemove(req.params.id);

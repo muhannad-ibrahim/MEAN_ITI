@@ -47,19 +47,24 @@ const getAuthorsPagination = async (req, res) => {
 };
 
 const createAuthor = async (req, res) => {
-    if (!checkRole.isAdmin(req, res)) {
-        return res.json({ message: 'error', error: 'You are not an admin' });
+    const isUserAdmin = await checkRole.isAdmin(req);
+    if (!isUserAdmin) {
+        return res.status(401).json({ message: 'You are not an admin' });
     }
     const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
-    const author = await new Author({
+    const authorData = {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         photo: imageURL,
         dob: req.body.dob,
         bio: req.body.bio,
-    });
-    author.save().then((savedAuthor) => res.json({ message: 'success', savedAuthor }))
-        .catch((error) => res.json({ message: error.message }));
+    };
+    try {
+        const author = await Author.create(authorData);
+        return res.status(201).json({ message: 'success', data: author });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
 };
 
 const getAuthorById = async (req, res) => {
@@ -80,8 +85,9 @@ const getAllAuthorsBooks = async (req, res) => {
 };
 
 const updateAuthorById = async (req, res) => {
-    if (!checkRole.isAdmin(req, res)) {
-        return res.json({ message: 'error', error: 'You are not an admin' });
+    const isUserAdmin = await checkRole.isAdmin(req);
+    if (!isUserAdmin) {
+        return res.status(401).json({ message: 'You are not an admin' });
     }
     try {
         const author = await Author.findById(req.params.id);
@@ -103,8 +109,9 @@ const updateAuthorById = async (req, res) => {
 };
 
 const deleteAuthorById = async (req, res) => {
-    if (!checkRole.isAdmin(req, res)) {
-        return res.json({ message: 'error', error: 'You are not an admin' });
+    const isUserAdmin = await checkRole.isAdmin(req);
+    if (!isUserAdmin) {
+        return res.status(401).json({ message: 'You are not an admin' });
     }
     const author = await Author.findByIdAndRemove(req.params.id);
     if (!author) {

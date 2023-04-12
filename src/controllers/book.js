@@ -28,8 +28,9 @@ const getAllBooks = async (req, res) => {
 };
 
 const createBook = async (req, res) => {
-    if (!checkRole.isAdmin(req)) {
-        return res.json({ message: 'error', error: 'you are not admin' });
+    const isUserAdmin = await checkRole.isAdmin(req);
+    if (!isUserAdmin) {
+        return res.status(401).json({ message: 'You are not an admin' });
     }
     const imageURL = `${req.protocol}://${req.headers.host}/bookImg/${req.file.filename}`;
     const book = await new Book({
@@ -52,8 +53,9 @@ const getBookById = async (req, res) => {
 };
 
 const updateBookById = async (req, res) => {
-    if (!checkRole.isAdmin(req)) {
-        return res.json({ message: 'error', error: 'you are not admin' });
+    const isUserAdmin = await checkRole.isAdmin(req);
+    if (!isUserAdmin) {
+        return res.status(401).json({ message: 'You are not an admin' });
     }
     try {
         const { body: { name } } = req;
@@ -68,8 +70,9 @@ const updateBookById = async (req, res) => {
 };
 
 const deleteBookById = async (req, res) => {
-    if (!checkRole.isAdmin(req)) {
-        return res.json({ message: 'error', error: 'you are not admin' });
+    const isUserAdmin = await checkRole.isAdmin(req);
+    if (!isUserAdmin) {
+        return res.status(401).json({ message: 'You are not an admin' });
     }
     const book = await Book.findByIdAndRemove(req.params.id);
     if (!book) {
