@@ -3,7 +3,6 @@
 const UserBook = require('../models/userBooks');
 
 const create = (req, res) => {
-    console.log('mmmmmmmmmm');
     const userBook = new UserBook({
         UserId: '642624b835bf073262dc5d9b',
         // UserId: 1,
@@ -15,19 +14,13 @@ const create = (req, res) => {
         ],
     });
     userBook.save()
-        .then(() => {
-            console.log('ssssss');
-            res.json({ message: 'success' });
-        })
-        .catch((error) => {
-            console.log('ffffff');
-            res.json({ message: error.message });
-        });
+        .then(() => res.json({ message: 'success' }))
+        .catch((error) => res.json({ message: error.message }));
 };
 
 const getAlluserBooks = async (req, res) => {
     const userBooks = await UserBook.find();
-    res.json(userBooks);
+    return res.json(userBooks);
 };
 
 module.exports = {

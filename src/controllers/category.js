@@ -90,9 +90,9 @@ const getAllBooksByCategoryId = async (req, res) => {
             path: 'AuthorId',
             select: 'firstName',
         }).exec();
-        res.json({ data: books });
+        return res.json({ data: books });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
 };
 module.exports = {
