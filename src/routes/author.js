@@ -23,7 +23,7 @@ router.get('/all', authorController.getAllAuthors);
 router.post('/', upload.single('photo'), authorController.createAuthor);
 router.get('/:AuthorId', authorController.getAllAuthorsBooks);
 router.get('/:id', authorController.getAuthorById);
-router.patch('/:id', authorController.updateAuthorById);
+router.patch('/:id', upload.single('photo'), authorController.updateAuthorById);
 router.delete('/:id', authorController.deleteAuthorById);
 
 module.exports = router;

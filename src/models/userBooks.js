@@ -38,4 +38,5 @@ const userBookSchema = new mongoose.Schema({
 
 userBookSchema.plugin(mongoosePagination);
 
-module.exports = mongoose.model('UserBook', userBookSchema);
+const UserBook = mongoose.model('UserBook', userBookSchema);
+module.exports = UserBook;

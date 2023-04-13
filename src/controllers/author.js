@@ -47,14 +47,16 @@ const createAuthor = async (req, res, next) => {
     if (!isUserAdmin) {
         return res.status(401).json({ message: 'You are not an admin' });
     }
-    const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
     const authorData = {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
-        photo: imageURL,
         dob: req.body.dob,
         bio: req.body.bio,
     };
+    if (req.file) {
+        const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
+        authorData.photo = imageURL;
+    }
     const [error, savedAuthor] = await asyncWrapper(new Author(authorData).save());
     if (error) {
         return next(error);
@@ -85,21 +87,18 @@ const updateAuthorById = async (req, res, next) => {
         return res.status(401).json({ message: 'You are not an admin' });
     }
 
-    const author = await Author.findById(req.params.id);
-    author.firstName = req.body.firstName || author.firstName;
-    author.lastName = req.body.lastName || author.lastName;
-    author.photo = req.body.photo || author.photo;
-    author.dob = req.body.dob || author.dob;
-    author.bio = req.body.bio || author.bio;
-
-    const promise = author.save();
-    const [err, savedAuthor] = await asyncWrapper(promise);
+    const promise = Author.findByIdAndUpdate(req.params.id, { name: req.body.name }, { new: true });
+    const [err, author] = await asyncWrapper(promise);
 
     if (err) {
         return next(err);
     }
 
-    return res.json({ message: 'success', savedAuthor });
+    if (!author) {
+        return next({ message: 'Author not found' });
+    }
+
+    return res.json({ message: 'success', author });
 };
 
 const deleteAuthorById = async (req, res, next) => {

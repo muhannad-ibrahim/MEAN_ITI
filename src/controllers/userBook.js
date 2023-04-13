@@ -1,8 +1,19 @@
+/* eslint-disable no-const-assign */
+/* eslint-disable no-use-before-define */
+/* eslint-disable no-empty */
+/* eslint-disable no-shadow */
+/* eslint-disable max-len */
 /* eslint-disable consistent-return */
 /* eslint-disable radix */
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
+const jwt = require('jsonwebtoken');
 const UserBook = require('../models/userBooks');
+const asyncWrapper = require('../middleware');
+const Book = require('../models/Book');
+const User = require('../models/User');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'test';
 
 const create = async (req, res, next) => {
     const userId = req.body.UserId;
@@ -46,54 +57,36 @@ const create = async (req, res, next) => {
     return res.json({ message: 'success' });
 };
 
-const getUserBooks = async (req, res, next) => {
+const getUserBooks = async (req, res) => {
+    console.log('ddddd');
     const currentPage = parseInt(req.query.page) || 1;
     const itemPerPage = 5;
     const token = req.cookies.jwt;
     let decodedToken;
     try {
-        decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (err) {
-        return next({ message: 'Unauthenticated' });
+        const token = req.cookies.jwt;
+        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+        const users = await UserBook.paginate({}, { page: currentPage, limit: itemPerPage })
+            .findById(decodedToken.id)
+            .populate({
+                path: 'books.bookId',
+                select: 'name AuthorId photo rating',
+                populate: {
+                    path: 'AuthorId',
+                    select: 'firstName',
+                },
+            });
+        return res.json({
+            message: 'success',
+            data: users.docs,
+            pages: users.totalPages,
+            currentPage: users.page,
+            nextPage: users.hasNextPage ? users.nextPage : null,
+            prevPage: users.hasPrevPage ? users.prevPage : null,
+        });
+    } catch (error) {
+        res.json(error.message);
     }
-
-    const promise = UserBook
-        .find({ UserId: decodedToken.id })
-        .populate({
-            path: 'bookId',
-            select: 'name AuthorId photo rating',
-            populate: {
-                path: 'AuthorId',
-                select: 'firstName',
-            },
-        })
-        .skip((currentPage - 1) * itemPerPage)
-        .limit(itemPerPage)
-        .exec();
-
-    const [err, userBooks] = await asyncWrapper(promise);
-    if (err) {
-        return next(err);
-    }
-
-    const countPromise = UserBook.countDocuments({ UserId: decodedToken.id }).exec();
-    const [countErr, count] = await asyncWrapper(countPromise);
-    if (countErr) {
-        return next(countErr);
-    }
-
-    const pages = Math.ceil(count / itemPerPage);
-    const nextPage = currentPage < pages ? currentPage + 1 : null;
-    const prevPage = currentPage > 1 ? currentPage - 1 : null;
-
-    return res.json({
-        message: 'success',
-        data: userBooks,
-        pages,
-        currentPage,
-        nextPage,
-        prevPage,
-    });
 };
 
 const addBookToUser = async (req, res, next) => {
@@ -116,8 +109,53 @@ const addBookToUser = async (req, res, next) => {
     res.status(200).json({ message: 'Book added to user successfully' });
 };
 
+const updatePushBook = async (req, res) => {
+    const token = req.cookies.jwt;
+    const payLoad = jwt.verify(token, process.env.JWT_SECRET);
+    const idBook = req.query.id;
+    const rateBook = req.body.rate;
+    const shelveBook = req.body.shelve;
+    const commentBook = req.body.comment;
+    let previousRate = 0;
+    const addBook = await UserBook.findByIdAndUpdate(
+        { UserId: payLoad.id, 'books.bookId': { $ne: idBook } },
+        {
+            $push: {
+                books: {
+                    bookId: idBook, rate: rateBook, comment: commentBook, shelve: shelveBook,
+                },
+            },
+        },
+        {
+            new: true,
+        },
+    ).select({ books: { $elemMatch: { boodkId: idBook } } });
+    if (!addBook) {
+        const condition = {
+            userId: payLoad.id,
+            bookId: { $elemMatch: { boodkId: idBook } },
+        };
+        const upddate = {
+            $set: { 'books.$.rate': rateBook, 'books.$.shelve': shelveBook },
+        };
+        const result = await UserBook.findByIdAndUpdate(condition, upddate).select({ books: { $elemMatch: { boodkId: idBook } } });
+        previousRate = result.books.rate;
+    }
+    if (rateBook) {
+        updateAvgRate(idbook, rateBook, previousRate);
+    }
+    if (addBook) return addBook;
+    result = await UserBook.findOne({ userId: payLoad.id }).select({ books: { $elemMatch: { bookId: idBook } } });
+    return result;
+};
+
+const updateAvgRate = async (idbook, rateBook, previousRate) => {
+
+};
+
 module.exports = {
     create,
     getUserBooks,
     addBookToUser,
+    updatePushBook,
 };

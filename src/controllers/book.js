@@ -4,6 +4,7 @@
 const Book = require('../models/Book');
 const checkRole = require('../middleware/checkRole');
 // const Category = require('../models/Category');
+const asyncWrapper = require('../middleware');
 
 const getAllBooks = async (req, res, next) => {
     const itemPerPage = 5;
