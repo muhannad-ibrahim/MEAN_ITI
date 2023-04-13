@@ -70,20 +70,19 @@ const updateBookById = async (req, res, next) => {
     if (!isUserAdmin) {
         return res.status(401).json({ message: 'You are not an admin' });
     }
-
-    const { body: { name } } = req;
-    const promise = Book.findOneAndUpdate(req.params.id, { name });
-    const [err, book] = await asyncWrapper(promise);
+    const { name } = req.body;
+    const promise = Book.findByIdAndUpdate(req.params.id, { name }, { new: true });
+    const [err, author] = await asyncWrapper(promise);
 
     if (err) {
         return next(err);
     }
 
-    if (!book) {
-        return next({ message: 'Book not found' });
+    if (!author) {
+        return next({ message: 'Author not found' });
     }
 
-    return res.json({ message: 'success', book });
+    return res.json({ message: 'success', author });
 };
 
 const deleteBookById = async (req, res, next) => {
