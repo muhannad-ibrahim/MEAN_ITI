@@ -21,7 +21,7 @@ const getAllCategories = async (req, res, next) => {
 
 const getCategoriesPagination = async (req, res, next) => {
     const currentPage = parseInt(req.query.page) || 1;
-    const itemPerPage = 5;
+    const itemPerPage = parseInt(req.query.limit) || 5;
 
     const promise = Category.paginate({}, { page: currentPage, limit: itemPerPage });
     const [err, categories] = await asyncWrapper(promise);
