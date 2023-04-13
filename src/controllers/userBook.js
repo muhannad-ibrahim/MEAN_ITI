@@ -9,6 +9,7 @@
 /* eslint-disable no-unused-vars */
 const jwt = require('jsonwebtoken');
 const UserBook = require('../models/userBooks');
+const asyncWrapper = require('../middleware');
 const Book = require('../models/Book');
 const User = require('../models/User');
 
