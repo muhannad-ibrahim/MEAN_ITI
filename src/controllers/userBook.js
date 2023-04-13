@@ -38,14 +38,13 @@ const create = async (req, res, next) => {
         return res.status(404).send({ message: 'Book not found' });
     }
 
-    const userBook = new UserBook({
-        UserId: userId,
-        bookId,
-        reviews: [
-            { reviewerName: 'user1', comment: 'Great book!', rate: 5 },
-            { reviewerName: 'user2', comment: 'I enjoyed it.', rate: 4 },
-        ],
-    });
+    // const userBook = new UserBook({
+    //     UserId: userId,
+    //     books: [
+    //         { bookId:'', reviewerName: 'user1', comment: 'Great book!', rate: 5 },
+    //         { bookId:'', reviewerName: 'user2', comment: 'I enjoyed it.', rate: 4 },
+    //     ],
+    // });
 
     const savePromise = userBook.save();
     const [saveErr] = await asyncWrapper(savePromise);

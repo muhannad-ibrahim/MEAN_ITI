@@ -86,11 +86,16 @@ const updateAuthorById = async (req, res, next) => {
     if (!isUserAdmin) {
         return res.status(401).json({ message: 'You are not an admin' });
     }
+
     const fname = req.body.firstName;
     const lname = req.body.lastName;
     const { bio } = req.body;
-    const { photo } = req.body;
+    // const { photo } = req.body;
     const { dob } = req.body;
+    if (req.file) {
+        const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
+        req.body.photo = imageURL;
+    }
     const promise = Author.findByIdAndUpdate(req.params.id, {
         firstName: fname, lastName: lname, bio, dob, photo,
     }, { new: true });
