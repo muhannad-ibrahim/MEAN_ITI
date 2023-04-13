@@ -47,14 +47,16 @@ const createAuthor = async (req, res, next) => {
     if (!isUserAdmin) {
         return res.status(401).json({ message: 'You are not an admin' });
     }
-    const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
     const authorData = {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
-        photo: imageURL,
         dob: req.body.dob,
         bio: req.body.bio,
     };
+    if (req.file) {
+        const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
+        authorData.photo = imageURL;
+    }
     const [error, savedAuthor] = await asyncWrapper(new Author(authorData).save());
     if (error) {
         return next(error);
@@ -88,7 +90,16 @@ const updateAuthorById = async (req, res, next) => {
     const author = await Author.findById(req.params.id);
     author.firstName = req.body.firstName || author.firstName;
     author.lastName = req.body.lastName || author.lastName;
-    author.photo = req.file.photo || author.photo;
+    if (req.file) {
+        const filename = author.photo.split('/').pop();
+        const path = './images/';
+        if (fs.existsSync(path + filename)) {
+            console.log('file exists');
+            fs.unlinkSync(path + filename);
+        }
+        const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
+        author.photo = imageURL;
+    }
     author.dob = req.body.dob || author.dob;
     author.bio = req.body.bio || author.bio;
 
