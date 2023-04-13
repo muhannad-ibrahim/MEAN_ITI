@@ -10,7 +10,7 @@ router.use(cookieParser());
 const storage = multer.diskStorage({
     destination: './images/bookImg',
     filename: (req, file, cb) => {
-        cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}}`);
+        cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
     }
 });
 
@@ -21,7 +21,7 @@ const upload = multer({
 router.get('/', bookController.getAllBooks);
 router.post('/', upload.single('photo'), bookController.createBook);
 router.get('/:id', bookController.getBookById);
-router.patch('/:id', bookController.updateBookById);
+router.patch('/:id', upload.single('photo'), bookController.updateBookById);
 router.delete('/:id', bookController.deleteBookById);
 
 module.exports = router;
