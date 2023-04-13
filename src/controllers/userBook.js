@@ -1,3 +1,6 @@
+/* eslint-disable no-const-assign */
+/* eslint-disable no-use-before-define */
+/* eslint-disable no-empty */
 /* eslint-disable no-shadow */
 /* eslint-disable max-len */
 /* eslint-disable consistent-return */
@@ -105,13 +108,48 @@ const addBookToUser = async (req, res, next) => {
     res.status(200).json({ message: 'Book added to user successfully' });
 };
 
-const updatePushBook = (req, res) => {
+const updatePushBook = async (req, res) => {
     const token = req.cookies.jwt;
     const payLoad = jwt.verify(token, process.env.JWT_SECRET);
     const idBook = req.query.id;
     const rateBook = req.body.rate;
     const shelveBook = req.body.shelve;
     const commentBook = req.body.comment;
+    let previousRate = 0;
+    const addBook = await UserBook.findByIdAndUpdate(
+        { UserId: payLoad.id, 'books.bookId': { $ne: idBook } },
+        {
+            $push: {
+                books: {
+                    bookId: idBook, rate: rateBook, comment: commentBook, shelve: shelveBook,
+                },
+            },
+        },
+        {
+            new: true,
+        },
+    ).select({ books: { $elemMatch: { boodkId: idBook } } });
+    if (!addBook) {
+        const condition = {
+            userId: payLoad.id,
+            bookId: { $elemMatch: { boodkId: idBook } },
+        };
+        const upddate = {
+            $set: { 'books.$.rate': rateBook, 'books.$.shelve': shelveBook },
+        };
+        const result = await UserBook.findByIdAndUpdate(condition, upddate).select({ books: { $elemMatch: { boodkId: idBook } } });
+        previousRate = result.books.rate;
+    }
+    if (rateBook) {
+        updateAvgRate(idbook, rateBook, previousRate);
+    }
+    if (addBook) return addBook;
+    result = await UserBook.findOne({ userId: payLoad.id }).select({ books: { $elemMatch: { bookId: idBook } } });
+    return result;
+};
+
+const updateAvgRate = async (idbook, rateBook, previousRate) => {
+
 };
 
 module.exports = {
