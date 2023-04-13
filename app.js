@@ -9,6 +9,7 @@ const helmet = require('helmet');
 const hpp = require('hpp');
 const dotenv = require('dotenv');
 const dbConnection = require('./src/db');
+const asyncWrapper = require('./src/middleware');
 
 // connecting with cluster MongoDB
 // const MongoDB = require('mongodb').MongoClient;
@@ -34,7 +35,7 @@ app.use(express.static('images'));
 // Middleware for parsing json data
 app.use(express.json());
 app.use(router);
-app.use((err, req, res, next) => res.status(400 || 500).json(
+app.use((err, req, res, next) => res.status(err.statusCode || 400).json(
     {
         message: err.message,
     },
@@ -55,7 +56,7 @@ async function main() {
     try {
         await dbConnection(process.env.MONGO_URI);
     } catch (error) {
-        console.error(error);
+        console.error(error.message);
     }
 }
 

@@ -1,14 +1,14 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const asyncWrapper = require('./middleware');
 
 dotenv.config();
 
 module.exports = async (URL) => {
-    mongoose.connect(URL)
-        .then(() => {
-            console.log('Database connected');
-        })
-        .catch((error) => {
-            console.error('could not connect to DB', error);
-        });
+    const [err] = await asyncWrapper(mongoose.connect(URL));
+    if (err) {
+        console.error('could not connect to DB', err.message);
+    } else {
+        console.log('Database connected');
+    }
 };

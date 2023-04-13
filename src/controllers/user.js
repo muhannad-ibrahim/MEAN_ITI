@@ -1,17 +1,12 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
-/* eslint-disable radix */
-/* eslint-disable consistent-return */
-// eslint-disable-next-line no-unused-vars
-const { query } = require('express');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const checkRole = require('../middleware/checkRole');
+const asyncWrapper = require('../middleware');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'test';
+const { JWT_SECRET } = process.env;
 
-const signup = async (req, res) => {
+const signup = async (req, res, next) => {
     const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
     const user = new User({
         firstName: req.body.firstName,
@@ -21,181 +16,244 @@ const signup = async (req, res) => {
         role: req.body.role,
         photo: imageURL,
     });
-    user.save()
-        .then(() => res.json({ message: 'success' }))
-        .catch((error) => res.json({ message: error.message }));
+
+    const promise = user.save();
+    const [err] = await asyncWrapper(promise);
+
+    if (err) {
+        return next(err);
+    }
+    return res.json({ message: 'success' });
 };
 
-const getAllUsers = async (req, res) => {
+const getAllUsers = async (req, res, next) => {
     const isUserAdmin = await checkRole.isAdmin(req);
     if (!isUserAdmin) {
         return res.status(401).json({ message: 'You are not an admin' });
     }
+
     const itemPerPage = 5;
-    const currentPage = parseInt(req.query.page) || 1;
-    try {
-        const users = await User.paginate({}, { page: currentPage, limit: itemPerPage });
-        if (users.docs.length === 0) {
-            return res.status(404).json({ message: 'there is no users' });
-        }
-        res.json({
-            message: 'success',
-            data: users.docs,
-            pages: users.totalPages,
-            currentPage: users.page,
-            nextPage: users.hasNextPage ? users.nextPage : null,
-            prevPage: users.hasPrevPage ? users.prevPage : null,
+    const currentPage = parseInt(req.query.page, 10) || 1;
 
-        });
-    } catch (error) {
-        return res.json(error.message);
+    const promise = User.paginate({}, { page: currentPage, limit: itemPerPage });
+    const [err, users] = await asyncWrapper(promise);
+
+    if (err) {
+        return next(err);
     }
+
+    if (users.docs.length === 0) {
+        return next(new Error('There are no users'));
+    }
+
+    return res.json({
+        message: 'success',
+        data: users.docs,
+        pages: users.totalPages,
+        currentPage: users.page,
+        nextPage: users.hasNextPage ? users.nextPage : null,
+        prevPage: users.hasPrevPage ? users.prevPage : null,
+    });
 };
 
-const getUserById = async (req, res) => {
+const getUserById = async (req, res, next) => {
     const isUserAdmin = await checkRole.isAdmin(req);
     if (!isUserAdmin) {
         return res.status(401).json({ message: 'You are not an admin' });
     }
-    try {
-        const user = await User.findById(req.params.id);
-        return res.json(user);
-    } catch (error) {
-        return res.json(error.message);
+
+    const promise = User.findById(req.params.id);
+    const [err, user] = await asyncWrapper(promise);
+
+    if (err) {
+        return next(err);
     }
+
+    return res.json(user);
 };
 
-const updateUserById = async (req, res) => {
+const updateUserById = async (req, res, next) => {
     const isUserAdmin = await checkRole.isAdmin(req);
     if (!isUserAdmin) {
         return res.status(401).json({ message: 'You are not an admin' });
     }
-    try {
-        const {
-            body: {
-                firstName, lastName, email, role,
-            },
-        } = req;
-        const user = await User.findByIdAndUpdate(req.params.id, {
+
+    const {
+        body: {
             firstName, lastName, email, role,
-        });
-        return res.json(user);
-    } catch (error) {
-        return res.json(error.message);
+        },
+    } = req;
+
+    const promise = User.findByIdAndUpdate(req.params.id, {
+        firstName, lastName, email, role,
+    });
+    const [err, user] = await asyncWrapper(promise);
+
+    if (err) {
+        return next(err);
     }
+
+    return res.json(user);
 };
 
-const deleteUserById = async (req, res) => {
+const deleteUserById = async (req, res, next) => {
     const isUserAdmin = await checkRole.isAdmin(req);
     if (!isUserAdmin) {
         return res.status(401).json({ message: 'You are not an admin' });
     }
-    const user = await User.findByIdAndRemove(req.params.id);
-    if (!user) {
-        return res.json({ message: 'error', error: 'Author not found' });
+
+    const promise = User.findByIdAndRemove(req.params.id);
+    const [err, user] = await asyncWrapper(promise);
+
+    if (err) {
+        return next(err);
     }
+
+    if (!user) {
+        return next({ message: 'User not found' });
+    }
+
     const filename = user.photo.split('/').pop();
     const path = './images/';
+
     if (fs.existsSync(path + filename)) {
         console.log('file exists');
         fs.unlinkSync(path + filename);
     } else {
         console.log('file not found!');
     }
+
     return res.json({ message: 'success', user });
 };
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
     const { body: { email, password } } = req;
-    const user = await User.findOne({ email }).exec();
+
+    const promise = User.findOne({ email }).exec();
+    const [err, user] = await asyncWrapper(promise);
+
+    if (err) {
+        return next(err);
+    }
+
     if (!user) {
-        return res.json({ message: 'error', error: 'User not found' });
+        return next({ message: 'User not found' });
     }
+
     const valid = user.verifyPassword(password);
+
     if (!valid) {
-        return res.json({ message: 'error', error: 'UNAUTHENTICATED to login' });
+        return next({ message: 'UNAUTHENTICATED to login' });
     }
+
     const token = jwt.sign({ email, id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '4h' });
     res.cookie('jwt', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 4 });
 
     return res.json({ message: 'success' });
 };
 
-const getUserProfile = async (req, res) => {
+const getUserProfile = async (req, res, next) => {
+    const cookie = req.cookies.jwt;
+
+    let payload;
     try {
-        const cookie = req.cookies.jwt;
-
-        const payload = jwt.verify(cookie, JWT_SECRET);
-
-        if (!payload) {
-            return res.status(401).send({
-                message: 'unauthenticated',
-            });
-        }
-
-        const user = await User.findOne({ email: payload.email });
-
-        const { _id, ...data } = await user.toJSON();
-
-        return res.send(data);
-    } catch (e) {
-        return res.status(401).send({
-            message: 'unauthenticated',
-        });
+        payload = jwt.verify(cookie, JWT_SECRET);
+    } catch (err) {
+        return next({ message: 'UNAUTHENTICATED to get user profile' });
     }
+
+    const promise = User.findOne({ email: payload.email }).exec();
+    const [err, user] = await asyncWrapper(promise);
+
+    if (err) {
+        return next(err);
+    }
+
+    if (!user) {
+        return next({ message: 'User not found' });
+    }
+
+    const { _id, ...data } = await user.toJSON();
+
+    return res.send(data);
 };
 
-const logout = async (req, res) => res.clearCookie('jwt');
+const logout = async (req, res) => {
+    res.clearCookie('jwt');
+    res.redirect('/user/login');
+};
 
 const displayLogoutMessage = async (req, res) => res.send('logout successfully');
 
-const getUserBooks = async (req, res) => {
+const getUserBooks = async (req, res, next) => {
+    const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
+    const pageSize = parseInt(req.query.pageSize, 10) || 6;
+    const token = req.cookies.jwt;
+
+    let decodedToken;
     try {
-        const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
-        const pageSize = parseInt(req.query.pageSize, 10) || 6;
-        const token = req.cookies.jwt;
-        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-        const users = await User
-            .findById(decodedToken.id)
-            .populate({
-                path: 'books.bookId',
-                select: 'name AuthorId photo rating',
-                populate: {
-                    path: 'AuthorId',
-                    select: 'firstName',
-                },
-            })
-            .skip((pageNumber) * pageSize)
-            .limit(pageSize)
-            .exec();
-        const usersCount = await User.countDocuments();
-        return res.json({ data: users, total: usersCount });
-    } catch (error) {
-        return res.json(error.message);
+        decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+        return res.json({ message: 'invalid token' });
     }
+
+    const promise = User
+        .findById(decodedToken.id)
+        .populate({
+            path: 'books.bookId',
+            select: 'name AuthorId photo rating',
+            populate: {
+                path: 'AuthorId',
+                select: 'firstName',
+            },
+        })
+        .skip(pageNumber * pageSize)
+        .limit(pageSize)
+        .exec();
+
+    const [err, users] = await asyncWrapper(promise);
+    if (err) {
+        return next(err);
+    }
+
+    const countPromise = User.countDocuments().exec();
+    const [countErr, usersCount] = await asyncWrapper(countPromise);
+    if (countErr) {
+        return next(countErr);
+    }
+
+    return res.json({ data: users, total: usersCount });
 };
 
-const addBookToUser = async (req, res) => {
+const addBookToUser = async (req, res, next) => {
+    const bookId = req.params.id;
+    const token = req.cookies.jwt;
+
+    let decodedToken;
     try {
-        // Get the book ID from the URL parameter
-        const bookId = req.params.id;
-
-        // Get the JWT from the cookies and decode it to get the user ID
-        const token = req.cookies.jwt;
-        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-
-        // Find the user in the database
-        const user = await User.findById(decodedToken.id);
-
-        // Add the book to the user's array of books
-        user.books.push({ bookId });
-        // Save the user's changes
-        await user.save();
-        return res.status(200).json({ message: 'Book added to user successfully' });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Error adding book to user' });
+        decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+        return res.status(401).send({ message: 'unauthenticated' });
     }
+
+    const promise = User.findById(decodedToken.id).exec();
+    const [err, user] = await asyncWrapper(promise);
+    if (err) {
+        return next(err);
+    }
+
+    if (!user) {
+        return next({ message: 'User not found' });
+    }
+
+    user.books.push({ bookId });
+    const savePromise = user.save();
+    const [saveErr] = await asyncWrapper(savePromise);
+    if (saveErr) {
+        return next(saveErr);
+    }
+
+    return res.status(200).json({ message: 'Book added to user successfully' });
 };
 
 module.exports = {

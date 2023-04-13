@@ -70,22 +70,18 @@ const updateCategory = async (req, res, next) => {
         return res.status(401).json({ message: 'You are not an admin' });
     }
 
-    try {
-        const promise = Category.findByIdAndUpdate(req.params.id, { name: req.body.name }, { new: true });
-        const [err, cate] = await asyncWrapper(promise);
+    const promise = Category.findByIdAndUpdate(req.params.id, { name: req.body.name }, { new: true });
+    const [err, cate] = await asyncWrapper(promise);
 
-        if (err) {
-            return next(err);
-        }
-
-        if (!cate) {
-            return next({ message: 'Category not found' });
-        }
-
-        return res.json({ message: 'success', cate });
-    } catch (error) {
-        return res.json({ message: 'error', error: error.message });
+    if (err) {
+        return next(err);
     }
+
+    if (!cate) {
+        return next({ message: 'Category not found' });
+    }
+
+    return res.json({ message: 'success', cate });
 };
 
 const deleteCategory = async (req, res, next) => {
@@ -93,41 +89,32 @@ const deleteCategory = async (req, res, next) => {
     if (!isUserAdmin) {
         return res.status(401).json({ message: 'You are not an admin' });
     }
+    const promise = Category.findByIdAndRemove(req.params.id);
+    const [err, cate] = await asyncWrapper(promise);
 
-    try {
-        const promise = Category.findByIdAndRemove(req.params.id);
-        const [err, cate] = await asyncWrapper(promise);
-
-        if (err) {
-            return next(err);
-        }
-
-        if (!cate) {
-            return next({ message: 'Category not found' });
-        }
-
-        return res.json({ message: 'success', cate });
-    } catch (error) {
-        return next(error);
+    if (err) {
+        return next(err);
     }
+
+    if (!cate) {
+        return next({ message: 'Category not found' });
+    }
+
+    return res.json({ message: 'success', cate });
 };
 
 const getAllBooksByCategoryId = async (req, res, next) => {
-    try {
-        const promise = Book.find({ categoryId: req.params.categoryId }).populate({
-            path: 'AuthorId',
-            select: 'firstName',
-        }).exec();
-        const [err, books] = await asyncWrapper(promise);
+    const promise = Book.find({ categoryId: req.params.categoryId }).populate({
+        path: 'AuthorId',
+        select: 'firstName',
+    }).exec();
+    const [err, books] = await asyncWrapper(promise);
 
-        if (err) {
-            return next(err);
-        }
-
-        return res.json({ data: books });
-    } catch (error) {
-        return next(error);
+    if (err) {
+        return next(err);
     }
+
+    return res.json({ data: books });
 };
 
 module.exports = {
