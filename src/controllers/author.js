@@ -88,7 +88,7 @@ const updateAuthorById = async (req, res, next) => {
     const author = await Author.findById(req.params.id);
     author.firstName = req.body.firstName || author.firstName;
     author.lastName = req.body.lastName || author.lastName;
-    author.photo = req.body.photo || author.photo;
+    author.photo = req.file.photo || author.photo;
     author.dob = req.body.dob || author.dob;
     author.bio = req.body.bio || author.bio;
 
