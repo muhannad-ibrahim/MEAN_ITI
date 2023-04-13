@@ -87,30 +87,18 @@ const updateAuthorById = async (req, res, next) => {
         return res.status(401).json({ message: 'You are not an admin' });
     }
 
-    const author = await Author.findById(req.params.id);
-    author.firstName = req.body.firstName || author.firstName;
-    author.lastName = req.body.lastName || author.lastName;
-    if (req.file) {
-        const filename = author.photo.split('/').pop();
-        const path = './images/';
-        if (fs.existsSync(path + filename)) {
-            console.log('file exists');
-            fs.unlinkSync(path + filename);
-        }
-        const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
-        author.photo = imageURL;
-    }
-    author.dob = req.body.dob || author.dob;
-    author.bio = req.body.bio || author.bio;
-
-    const promise = author.save();
-    const [err, savedAuthor] = await asyncWrapper(promise);
+    const promise = Author.findByIdAndUpdate(req.params.id, { name: req.body.name }, { new: true });
+    const [err, author] = await asyncWrapper(promise);
 
     if (err) {
         return next(err);
     }
 
-    return res.json({ message: 'success', savedAuthor });
+    if (!author) {
+        return next({ message: 'Author not found' });
+    }
+
+    return res.json({ message: 'success', author });
 };
 
 const deleteAuthorById = async (req, res, next) => {
