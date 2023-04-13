@@ -3,6 +3,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 const UserBook = require('../models/userBooks');
+const asyncWrapper = require('../middleware');
 
 const create = async (req, res, next) => {
     const userId = req.body.UserId;
