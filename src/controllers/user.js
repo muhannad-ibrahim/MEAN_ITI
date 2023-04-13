@@ -180,7 +180,7 @@ const getUserProfile = async (req, res, next) => {
 
 const logout = async (req, res) => {
     res.clearCookie('jwt');
-    res.redirect('/user/login');
+    res.json({ message: 'User logged out' });
 };
 
 const displayLogoutMessage = async (req, res) => res.send('logout successfully');

@@ -87,29 +87,30 @@ const updateAuthorById = async (req, res, next) => {
         return res.status(401).json({ message: 'You are not an admin' });
     }
 
-    const fname = req.body.firstName;
-    const lname = req.body.lastName;
-    const { bio } = req.body;
-    // const { photo } = req.body;
-    const { dob } = req.body;
+    const author = await Author.findById(req.params.id);
+    author.firstName = req.body.firstName || author.firstName;
+    author.lastName = req.body.lastName || author.lastName;
     if (req.file) {
+        const filename = author.photo.split('/').pop();
+        const path = './images/';
+        if (fs.existsSync(path + filename)) {
+            console.log('file exists');
+            fs.unlinkSync(path + filename);
+        }
         const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
-        req.body.photo = imageURL;
+        author.photo = imageURL;
     }
-    const promise = Author.findByIdAndUpdate(req.params.id, {
-        firstName: fname, lastName: lname, bio, dob, photo,
-    }, { new: true });
-    const [err, author] = await asyncWrapper(promise);
+    author.dob = req.body.dob || author.dob;
+    author.bio = req.body.bio || author.bio;
+
+    const promise = author.save();
+    const [err, savedAuthor] = await asyncWrapper(promise);
 
     if (err) {
         return next(err);
     }
 
-    if (!author) {
-        return next({ message: 'Author not found' });
-    }
-
-    return res.json({ message: 'success', author });
+    return res.json({ message: 'success', savedAuthor });
 };
 
 const deleteAuthorById = async (req, res, next) => {
