@@ -86,8 +86,14 @@ const updateAuthorById = async (req, res, next) => {
     if (!isUserAdmin) {
         return res.status(401).json({ message: 'You are not an admin' });
     }
-
-    const promise = Author.findByIdAndUpdate(req.params.id, { name: req.body.name }, { new: true });
+    const fname = req.body.firstName;
+    const lname = req.body.lastName;
+    const { bio } = req.body;
+    const { photo } = req.body;
+    const { dob } = req.body;
+    const promise = Author.findByIdAndUpdate(req.params.id, {
+        firstName: fname, lastName: lname, bio, dob, photo,
+    }, { new: true });
     const [err, author] = await asyncWrapper(promise);
 
     if (err) {

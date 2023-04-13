@@ -9,7 +9,6 @@
 /* eslint-disable no-unused-vars */
 const jwt = require('jsonwebtoken');
 const UserBook = require('../models/userBooks');
-const asyncWrapper = require('../middleware');
 const Book = require('../models/Book');
 const User = require('../models/User');
 
@@ -142,16 +141,20 @@ const updatePushBook = async (req, res) => {
         previousRate = result.books.rate;
     }
     if (rateBook) {
-        updateAvgRate(idbook, rateBook, previousRate);
+        updateAvgRate(idBook, rateBook, previousRate);
     }
     if (addBook) return addBook;
     result = await UserBook.findOne({ userId: payLoad.id }).select({ books: { $elemMatch: { bookId: idBook } } });
     return result;
 };
 
-const updateAvgRate = async (idbook, rateBook, previousRate) => {
-
-};
+// const updateAvgRate = async (idBook, rateBook, previousRate) => {
+//     const reqBook = await Book.findById(idBook);
+//     if (reqBook.rate) {
+//         Book.updateOne(idBook, {$set:{book}})
+//     } else {
+//     }
+// };
 
 module.exports = {
     create,
