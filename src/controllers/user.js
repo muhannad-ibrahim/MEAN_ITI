@@ -187,7 +187,7 @@ const displayLogoutMessage = async (req, res) => res.send('logout successfully')
 
 const getUserBooks = async (req, res, next) => {
     const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
-    const pageSize = parseInt(req.query.pageSize, 10) || 6;
+    const pageSize = 5;
     const token = req.cookies.jwt;
 
     let decodedToken;
@@ -196,7 +196,9 @@ const getUserBooks = async (req, res, next) => {
     } catch (err) {
         return res.json({ message: 'invalid token' });
     }
-
+    const booksCount = await asyncWrapper(User.findById(decodedToken.id).count());
+    const totalPage = booksCount[1] / pageSize;
+    const totalPages = parseInt(totalPage, 10) + 1;
     const promise = User
         .findById(decodedToken.id)
         .populate({
@@ -215,14 +217,12 @@ const getUserBooks = async (req, res, next) => {
     if (err) {
         return next(err);
     }
-
-    const countPromise = User.countDocuments().exec();
-    const [countErr, usersCount] = await asyncWrapper(countPromise);
-    if (countErr) {
-        return next(countErr);
-    }
-
-    return res.json({ data: users, total: usersCount });
+    // return res.json({
+    //     message: 'success',
+    //     data: categories,
+    //     pages: totalPages,
+    // });
+    return res.json({ message: 'success', data: users, pages: totalPages });
 };
 
 const addBookToUser = async (req, res, next) => {

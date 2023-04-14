@@ -56,24 +56,23 @@ const create = async (req, res, next) => {
 };
 
 const getUserBooks = async (req, res) => {
-    console.log('ddddd');
     const currentPage = parseInt(req.query.page) || 1;
     const itemPerPage = 5;
     const token = req.cookies.jwt;
-    let decodedToken;
+    // let decodedToken;
     try {
         const token = req.cookies.jwt;
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-        const users = await UserBook.paginate({}, { page: currentPage, limit: itemPerPage })
-            .findById(decodedToken.id)
-            .populate({
-                path: 'books.bookId',
-                select: 'name AuthorId photo rating',
-                populate: {
-                    path: 'AuthorId',
-                    select: 'firstName',
-                },
-            });
+        const users = await UserBook.paginate({}, { page: currentPage, limit: itemPerPage });
+        // .findById(decodedToken.id)
+        // .populate({
+        //     path: 'books.bookId',
+        //     select: 'name AuthorId photo rating',
+        //     populate: {
+        //         path: 'AuthorId',
+        //         select: 'firstName',
+        //     },
+        // });
         return res.json({
             message: 'success',
             data: users.docs,
