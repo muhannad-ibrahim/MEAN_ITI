@@ -227,7 +227,7 @@ const deleteBook = async (req, res) => {
     return res.json(prevBook);
 };
 
-const getUserBooksByShelve = asyncFunction(async (req, res) => {
+const getUserBooksByShelve = async (req, res) => {
     const token = req.cookies.jwt;
     const payLoad = jwt.verify(token, process.env.JWT_SECRE);
     let shelvedBooks;
@@ -239,8 +239,8 @@ const getUserBooksByShelve = asyncFunction(async (req, res) => {
         shelvedBooks = await UserBook.find({ userId: req.payLoad.id, 'books.shelf': req.params.shelf })
             .populate('books.bookId').select({ books: { $elemMatch: { shelf: req.params.shelf } }, _id: 0 });
     }
-    res.status(200).send(shelvedBooks);
-});
+    return res.status(200).send(shelvedBooks);
+};
 
 module.exports = {
     // create,
