@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable radix */
 /* eslint-disable consistent-return */
 /* eslint-disable no-undef */
@@ -124,11 +125,15 @@ const deleteBookById = async (req, res, next) => {
 
     return res.json({ message: 'success', book });
 };
-
+const popularBook = async (req, res) => {
+    const mostPopularBook = await Book.find().sort({ popularity: -1 }).limit(1);
+    return res.json(mostPopularBook);
+};
 module.exports = {
     createBook,
     getAllBooks,
     getBookById,
     updateBookById,
     deleteBookById,
+    popularBook,
 };
