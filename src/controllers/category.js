@@ -19,28 +19,53 @@ const getAllCategories = async (req, res, next) => {
     return res.json({ message: 'success', data: categories });
 };
 
+// const getCategoriesPagination = async (req, res, next) => {
+//     const currentPage = parseInt(req.query.page) || 1;
+//     const itemPerPage = 5;
+
+//     const promise = Category.paginate({}, { page: currentPage, limit: itemPerPage });
+//     const [err, categories] = await asyncWrapper(promise);
+
+//     if (err) {
+//         return next(err);
+//     }
+
+//     if (categories.docs.length === 0) {
+//         return next({ message: 'There is no categories' });
+//     }
+
+//     return res.json({
+//         message: 'success',
+//         data: categories.docs,
+//         pages: categories.totalPages,
+//         currentPage: categories.page,
+//         nextPage: categories.hasNextPage ? categories.nextPage : null,
+//         prevPage: categories.hasPrevPage ? categories.prevPage : null,
+//     });
+// };
+
 const getCategoriesPagination = async (req, res, next) => {
-    const currentPage = parseInt(req.query.page) || 1;
-    const itemPerPage = 5;
+    const categoriesCount = await asyncWrapper(Category.countDocuments().exec());
+    const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
+    const pageSize = 5;
+    const totalPage = categoriesCount[1] / pageSize;
+    const totalPages = parseInt(totalPage, 10) + 1;
+    const [error, categories] = await asyncWrapper(Category
+        .find()
+        .skip((pageNumber) * pageSize)
+        .limit(pageSize)
+        .exec());
 
-    const promise = Category.paginate({}, { page: currentPage, limit: itemPerPage });
-    const [err, categories] = await asyncWrapper(promise);
-
-    if (err) {
-        return next(err);
+    if (error) {
+        return next(error);
     }
-
-    if (categories.docs.length === 0) {
-        return next({ message: 'There is no categories' });
+    if (categories.length === 0) {
+        return res.status(404).json({ message: 'There are no authors' });
     }
-
     return res.json({
         message: 'success',
-        data: categories.docs,
-        pages: categories.totalPages,
-        currentPage: categories.page,
-        nextPage: categories.hasNextPage ? categories.nextPage : null,
-        prevPage: categories.hasPrevPage ? categories.prevPage : null,
+        data: categories,
+        pages: totalPages,
     });
 };
 

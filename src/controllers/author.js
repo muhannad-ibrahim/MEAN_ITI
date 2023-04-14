@@ -22,23 +22,46 @@ const getAllAuthors = async (req, res, next) => {
     return res.json({ message: 'success', data: authors });
 };
 
+// const getAuthorsPagination = async (req, res, next) => {
+//     const authorperPage = 5;
+//     const currentPage = parseInt(req.query.page) || 1;
+//     const [error, authors] = await asyncWrapper(Author.paginate({}, { page: currentPage, limit: authorperPage }));
+//     if (error) {
+//         return next(error);
+//     }
+//     if (authors.docs.length === 0) {
+//         return res.status(404).json({ message: 'There are no authors' });
+//     }
+//     return res.json({
+//         message: 'success',
+//         data: authors.docs,
+//         pages: authors.totalPages,
+//         currentPage: authors.page,
+//         nextPage: authors.hasNextPage ? authors.nextPage : null,
+//         prevPage: authors.hasPrevPage ? authors.prevPage : null,
+//     });
+// };
+
 const getAuthorsPagination = async (req, res, next) => {
-    const authorperPage = 5;
-    const currentPage = parseInt(req.query.page) || 1;
-    const [error, authors] = await asyncWrapper(Author.paginate({}, { page: currentPage, limit: authorperPage }));
+    const authorsCount = await asyncWrapper(Author.find({}).count());
+    const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
+    const pageSize = parseInt(req.query.pageSize, 10) || 6;
+    const [error, authors] = await asyncWrapper(Author
+        .find()
+        .skip((pageNumber) * pageSize)
+        .limit(pageSize)
+        .exec());
+
     if (error) {
         return next(error);
     }
-    if (authors.docs.length === 0) {
+    if (authors.length === 0) {
         return res.status(404).json({ message: 'There are no authors' });
     }
     return res.json({
         message: 'success',
-        data: authors.docs,
-        pages: authors.totalPages,
-        currentPage: authors.page,
-        nextPage: authors.hasNextPage ? authors.nextPage : null,
-        prevPage: authors.hasPrevPage ? authors.prevPage : null,
+        data: authors,
+        pages: authorsCount,
     });
 };
 
@@ -87,29 +110,30 @@ const updateAuthorById = async (req, res, next) => {
         return res.status(401).json({ message: 'You are not an admin' });
     }
 
-    const fname = req.body.firstName;
-    const lname = req.body.lastName;
-    const { bio } = req.body;
-    // const { photo } = req.body;
-    const { dob } = req.body;
+    const author = await Author.findById(req.params.id);
+    author.firstName = req.body.firstName || author.firstName;
+    author.lastName = req.body.lastName || author.lastName;
     if (req.file) {
+        const filename = author.photo.split('/').pop();
+        const path = './images/';
+        if (fs.existsSync(path + filename)) {
+            console.log('file exists');
+            fs.unlinkSync(path + filename);
+        }
         const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
-        req.body.photo = imageURL;
+        author.photo = imageURL;
     }
-    const promise = Author.findByIdAndUpdate(req.params.id, {
-        firstName: fname, lastName: lname, bio, dob, photo,
-    }, { new: true });
-    const [err, author] = await asyncWrapper(promise);
+    author.dob = req.body.dob || author.dob;
+    author.bio = req.body.bio || author.bio;
+
+    const promise = author.save();
+    const [err, savedAuthor] = await asyncWrapper(promise);
 
     if (err) {
         return next(err);
     }
 
-    if (!author) {
-        return next({ message: 'Author not found' });
-    }
-
-    return res.json({ message: 'success', author });
+    return res.json({ message: 'success', savedAuthor });
 };
 
 const deleteAuthorById = async (req, res, next) => {

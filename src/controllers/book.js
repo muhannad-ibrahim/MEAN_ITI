@@ -1,6 +1,7 @@
 /* eslint-disable radix */
 /* eslint-disable consistent-return */
 /* eslint-disable no-undef */
+const fs = require('fs');
 const Book = require('../models/Book');
 const checkRole = require('../middleware/checkRole');
 // const Category = require('../models/Category');
@@ -64,25 +65,35 @@ const getBookById = async (req, res, next) => {
 
     return res.json({ message: 'success', book });
 };
-
 const updateBookById = async (req, res, next) => {
     const isUserAdmin = await checkRole.isAdmin(req);
     if (!isUserAdmin) {
         return res.status(401).json({ message: 'You are not an admin' });
     }
-    const { name } = req.body;
-    const promise = Book.findByIdAndUpdate(req.params.id, { name }, { new: true });
-    const [err, author] = await asyncWrapper(promise);
+
+    const book = await Book.findById(req.params.id);
+    book.name = req.body.firstName || book.name;
+    book.categoryId = req.body.categoryId || book.categoryId;
+    book.AuthorId = req.body.AuthorId || book.AuthorId;
+    if (req.file) {
+        const filename = book.photo.split('/').pop();
+        const path = './images/bookImg/';
+        console.log(filename);
+        if (fs.existsSync(path + filename)) {
+            console.log('file exists');
+            fs.unlinkSync(path + filename);
+        }
+        const imageURL = `${req.protocol}://${req.headers.host}/bookImg/${req.file.filename}`;
+        book.photo = imageURL;
+    }
+    const promise = book.save();
+    const [err, savedBook] = await asyncWrapper(promise);
 
     if (err) {
         return next(err);
     }
 
-    if (!author) {
-        return next({ message: 'Author not found' });
-    }
-
-    return res.json({ message: 'success', author });
+    return res.json({ message: 'success', savedBook });
 };
 
 const deleteBookById = async (req, res, next) => {
