@@ -20,7 +20,7 @@ const authorSchema = new mongoose.Schema({
     },
     bio: {
         type: String,
-        maxLength: 150,
+        maxLength: 300,
         minLength: 20,
     },
 }, {

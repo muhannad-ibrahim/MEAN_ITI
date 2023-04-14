@@ -45,13 +45,20 @@ const getAllAuthors = async (req, res, next) => {
 const getAuthorsPagination = async (req, res, next) => {
     const authorsCount = await asyncWrapper(Author.find({}).count());
     const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
-    const pageSize = parseInt(req.query.pageSize, 10) || 6;
+    const pageSize = parseInt(req.query.pageSize, 10) || 5;
+    let totalPages = 0;
+    if ((authorsCount % pageSize) === 0) {
+        const totalPage = authorsCount / pageSize;
+        totalPages = parseInt(totalPage, 10);
+    } else {
+        const totalPage = authorsCount / pageSize;
+        totalPages = parseInt(totalPage, 10) + 1;
+    }
     const [error, authors] = await asyncWrapper(Author
         .find()
         .skip((pageNumber) * pageSize)
         .limit(pageSize)
         .exec());
-
     if (error) {
         return next(error);
     }
@@ -61,7 +68,7 @@ const getAuthorsPagination = async (req, res, next) => {
     return res.json({
         message: 'success',
         data: authors,
-        pages: authorsCount,
+        pages: totalPages,
     });
 };
 
