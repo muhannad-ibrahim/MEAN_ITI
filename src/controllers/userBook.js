@@ -57,9 +57,6 @@ const getUserBooks = async (req, res, next) => {
     try {
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
         const user = await asyncWrapper(UserBook.find({ userId: decodedToken.id }));
-        // if (error) {
-        //     return next(error);
-        // }
         const booksCount = user[1][0].books.length;
 
         if ((booksCount % pageSize) === 0) {
@@ -87,52 +84,6 @@ const getUserBooks = async (req, res, next) => {
         res.json(error.message);
     }
 };
-// const getUserBooks = async (req, res) => {
-//     const currentPage = parseInt(req.query.page) || 1;
-//     const itemPerPage = 5;
-//     const token = req.cookies.jwt;
-//     try {
-//         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-//         const result = await UserBook.paginate(
-//             { userId: decodedToken.id },
-//             { page: currentPage, limit: itemPerPage },
-//         );
-//         // const result = await UserBook.find({ });
-//         console.log(result);
-//         const users = await UserBook.populate(result.docs, {
-//             path: 'userbooks.bookId',
-//             select: 'name AuthorId photo rating',
-//             populate: {
-//                 path: 'AuthorId',
-//                 select: 'firstName',
-//             },
-//         });
-//         return res.json({ result });
-//     } catch (error) {
-//         res.json(error.message);
-//     }
-// };
-
-// const addBookToUser = async (req, res, next) => {
-//     let result;
-//     const bookId = req.params.id;
-//     const token = req.cookies.jwt;
-//     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-//     const userPromise = User.findById(decodedToken.id);
-//     const [userErr, user] = await asyncWrapper(userPromise);
-//     if (userErr) {
-//         return next({ message: 'Error finding user' });
-//     }
-
-//     user.books.push({ bookId });
-//     const saveUserPromise = user.save();
-//     const [saveErr] = await asyncWrapper(saveUserPromise);
-//     if (saveErr) {
-//         return next({ message: 'Error saving user while adding book' });
-//     }
-
-//     res.status(200).json({ message: 'Book added to user successfully' });
-// };
 
 const updatePushBook = async (req, res) => {
     const token = req.cookies.jwt;
@@ -161,7 +112,6 @@ const updatePushBook = async (req, res) => {
                 },
             },
         },
-        // await Book.findByIdAndUpdate(req.body.bookId, { $inc: { Interactions: 1 } }),
         {
             new: true,
         },
@@ -216,17 +166,14 @@ const deleteBook = async (req, res) => {
     const token = req.cookies.jwt;
     const idBook = req.params.id;
     const payLoad = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(payLoad);
     const prevBook = await UserBook.findOne({ userId: payLoad.id }).select({ books: { $elemMatch: { bookId: idBook } } });
     const deletedBook = await UserBook.findOneAndUpdate(
         { userId: payLoad.id, 'books.bookId': idBook },
         { $pull: { books: { bookId: idBook } } },
     );
-    console.log(prevBook);
     if (!prevBook.books[0].rate) {
         return deletedBook;
     }
-    console.log('lllllll');
 
     const book = await Book.findById(idBook);
     book.totalRate -= prevBook.books[0].rate;
@@ -251,12 +198,6 @@ const getUserBooksByShelve = async (req, res, next) => {
             const totalPage = booksCount / pageSize;
             totalPages = parseInt(totalPage, 10) + 1;
         }
-        // let shelvedBooks;
-        // if (req.params.shelf === 'all') {
-        //     shelvedBooks = await UserBook.find({ userId: payLoad.id })
-        //         .populate('books.bookId').select({ books: 1, _id: 0 });
-        // }// pick books from a specific shelf
-        // else {
         const shelvedBooks = await UserBook
             .find({ userId: payLoad.id, 'books.shelve': req.params.shelve })
             .populate({
