@@ -36,10 +36,10 @@ const bookSchema = new mongoose.Schema(
             max: 5,
             default: 0,
         },
-        // popularity: {
-        //     type: Number,
-        //     default: 0,
-        // },
+        popularity: {
+            type: Number,
+            default: 0,
+        },
         Interactions: {
             type: Number,
             default: 1,
@@ -53,7 +53,13 @@ const bookSchema = new mongoose.Schema(
 );
 
 bookSchema.methods.calculatePopularity = function () {
-    this.popularity = (this.totalRate / this.ratingNumber) * this.Interactions;
+    if (this.totalRate !== undefined
+        && this.ratingNumber !== undefined
+        && this.Interactions !== undefined) {
+        this.popularity = parseInt((this.totalRate / this.ratingNumber) * this.Interactions, 10);
+    } else {
+        console.log('Skipping book because one or more required properties are undefined');
+    }
     return this.save();
 };
 bookSchema.virtual('averageRating').get(function () {

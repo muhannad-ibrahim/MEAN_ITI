@@ -70,7 +70,7 @@ const getUserBooks = async (req, res, next) => {
             select: 'name AuthorId photo rating',
             populate: {
                 path: 'AuthorId',
-                select: 'firstName',
+                select: 'firstName lastName',
             },
         });
         return res.json({ message: 'success', data: usersBooks, pages: totalPages });
