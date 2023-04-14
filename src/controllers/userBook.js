@@ -66,7 +66,7 @@ const getUserBooks = async (req, res, next) => {
             totalPages = parseInt(totalPage, 10) + 1;
         }
         const usersBooks = await UserBook.populate(user[1][0].books, {
-            path: 'books.bookId',
+            path: 'bookId',
             select: 'name AuthorId photo rating',
             populate: {
                 path: 'AuthorId',

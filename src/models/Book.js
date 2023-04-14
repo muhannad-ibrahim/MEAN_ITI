@@ -36,10 +36,10 @@ const bookSchema = new mongoose.Schema(
             max: 5,
             default: 0,
         },
-        popularity: {
-            type: Number,
-            default: 0,
-        },
+        // popularity: {
+        //     type: Number,
+        //     default: 0,
+        // },
         Interactions: {
             type: Number,
             default: 1,
