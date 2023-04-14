@@ -209,19 +209,21 @@ const deleteBook = async (req, res) => {
     const payLoad = jwt.verify(token, process.env.JWT_SECRET);
     console.log(payLoad);
     const prevBook = await UserBook.findOne({ userId: payLoad.id }).select({ books: { $elemMatch: { bookId: idBook } } });
-    const deletedBook = await UserBook.findByIdAndUpdate(
+    const deletedBook = await UserBook.findOneAndUpdate(
         { userId: payLoad.id, 'books.bookId': idBook },
         { $pull: { books: { bookId: idBook } } },
     );
+    console.log(prevBook);
     if (!prevBook.books[0].rate) {
         return deletedBook;
     }
     console.log('lllllll');
+
     const book = await Book.findById(idBook);
     book.totalRate -= prevBook.books[0].rate;
     book.ratingNumber--;
-    book.save();
-    return prevBook;
+    await book.save();
+    return res.json(prevBook);
 };
 
 module.exports = {
