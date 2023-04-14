@@ -8,27 +8,66 @@ const checkRole = require('../middleware/checkRole');
 // const Category = require('../models/Category');
 const asyncWrapper = require('../middleware');
 
+// const getAllBooks = async (req, res, next) => {
+//     const itemPerPage = parseInt(req.query.limit) || 5;
+//     const currentPage = parseInt(req.query.page) || 1;
+//     const promise = Book.paginate({}, { page: currentPage, limit: itemPerPage });
+//     const [err, books] = await asyncWrapper(promise);
+
+//     if (err) {
+//         return next(err);
+//     }
+
+//     if (books.docs.length === 0) {
+//         return res.status(404).json({ message: 'There are no books' });
+//     }
+
+//     return res.json({
+//         message: 'success',
+//         data: books.docs,
+//         pages: books.totalPages,
+//         currentPage: books.page,
+//         nextPage: books.hasNextPage ? books.nextPage : null,
+//         prevPage: books.hasPrevPage ? books.prevPage : null,
+//     });
+// };
+
 const getAllBooks = async (req, res, next) => {
-    const itemPerPage = parseInt(req.query.limit) || 5;
-    const currentPage = parseInt(req.query.page) || 1;
-    const promise = Book.paginate({}, { page: currentPage, limit: itemPerPage });
-    const [err, books] = await asyncWrapper(promise);
-
-    if (err) {
-        return next(err);
+    const booksCount = await asyncWrapper(Book.countDocuments().exec());
+    const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
+    const pageSize = parseInt(req.query.pageSize, 10) || 5;
+    let totalPages = 0;
+    if ((booksCount % pageSize) === 0) {
+        const totalPage = booksCount / pageSize;
+        totalPages = parseInt(totalPage, 10);
+    } else {
+        const totalPage = booksCount / pageSize;
+        totalPages = parseInt(totalPage, 10) + 1;
     }
+    const [error, books] = await asyncWrapper(Book
+        .find()
+        .populate({
+            path: 'AuthorId',
+            select: 'firstName',
+        })
+        .populate({
+            path: 'categoryId',
+            select: 'name',
+        })
+        .skip((pageNumber) * pageSize)
+        .limit(pageSize)
+        .exec());
 
-    if (books.docs.length === 0) {
+    if (error) {
+        return next(error);
+    }
+    if (books.length === 0) {
         return res.status(404).json({ message: 'There are no books' });
     }
-
     return res.json({
         message: 'success',
-        data: books.docs,
-        pages: books.totalPages,
-        currentPage: books.page,
-        nextPage: books.hasNextPage ? books.nextPage : null,
-        prevPage: books.hasPrevPage ? books.prevPage : null,
+        data: books,
+        pages: totalPages,
     });
 };
 

@@ -47,9 +47,15 @@ const getAllCategories = async (req, res, next) => {
 const getCategoriesPagination = async (req, res, next) => {
     const categoriesCount = await asyncWrapper(Category.countDocuments().exec());
     const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
-    const pageSize = 5;
-    const totalPage = categoriesCount[1] / pageSize;
-    const totalPages = parseInt(totalPage, 10) + 1;
+    const pageSize = parseInt(req.query.pageSize, 10) || 5;
+    let totalPages = 0;
+    if ((categoriesCount % pageSize) === 0) {
+        const totalPage = categoriesCount / pageSize;
+        totalPages = parseInt(totalPage, 10);
+    } else {
+        const totalPage = categoriesCount / pageSize;
+        totalPages = parseInt(totalPage, 10) + 1;
+    }
     const [error, categories] = await asyncWrapper(Category
         .find()
         .skip((pageNumber) * pageSize)
@@ -60,7 +66,7 @@ const getCategoriesPagination = async (req, res, next) => {
         return next(error);
     }
     if (categories.length === 0) {
-        return res.status(404).json({ message: 'There are no authors' });
+        return res.status(404).json({ message: 'There are no categories' });
     }
     return res.json({
         message: 'success',
