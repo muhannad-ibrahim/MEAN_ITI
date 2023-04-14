@@ -112,9 +112,9 @@ const updateBookById = async (req, res, next) => {
     }
 
     const book = await Book.findById(req.params.id);
-    book.name = req.body.firstName || book.name;
-    book.categoryId = req.body.categoryId || book.categoryId;
-    book.AuthorId = req.body.AuthorId || book.AuthorId;
+    book.name = req.body.name;
+    book.categoryId = req.body.categoryId;
+    book.AuthorId = req.body.AuthorId;
     if (req.file) {
         const filename = book.photo.split('/').pop();
         const path = './images/bookImg/';
