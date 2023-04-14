@@ -229,7 +229,6 @@ const deleteBook = async (req, res) => {
 
 const getUserBooksByShelve = asyncFunction(async (req, res) => {
     const token = req.cookies.jwt;
-    const idBook = req.params.id;
     const payLoad = jwt.verify(token, process.env.JWT_SECRE);
     let shelvedBooks;
     if (req.params.shelf === 'all') {
