@@ -52,11 +52,14 @@ const JWT_SECRET = process.env.JWT_SECRET || 'test';
 const getUserBooks = async (req, res, next) => {
     const token = req.cookies.jwt;
     const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
-    const pageSize = 5;
+    const pageSize = parseInt(req.query.pageSize, 10) || 5;
     let totalPages = 0;
     try {
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
         const user = await asyncWrapper(UserBook.find({ userId: decodedToken.id }));
+        // if (error) {
+        //     return next(error);
+        // }
         const booksCount = user[1][0].books.length;
 
         if ((booksCount % pageSize) === 0) {
@@ -66,14 +69,19 @@ const getUserBooks = async (req, res, next) => {
             const totalPage = booksCount / pageSize;
             totalPages = parseInt(totalPage, 10) + 1;
         }
-        const usersBooks = await UserBook.populate(user[1][0].books, {
-            path: 'bookId',
-            select: 'name AuthorId photo rating',
-            populate: {
-                path: 'AuthorId',
-                select: 'firstName lastName',
-            },
-        });
+        const usersBooks = await UserBook
+            .find({ userId: decodedToken.id })
+            .populate({
+                path: 'books.bookId',
+                select: 'name AuthorId photo rating',
+                populate: {
+                    path: 'AuthorId',
+                    select: 'firstName lastName',
+                },
+            })
+            .skip((pageNumber) * pageSize)
+            .limit(pageSize)
+            .exec();
         return res.json({ message: 'success', data: usersBooks, pages: totalPages });
     } catch (error) {
         res.json(error.message);
@@ -227,19 +235,47 @@ const deleteBook = async (req, res) => {
     return res.json(prevBook);
 };
 
-const getUserBooksByShelve = async (req, res) => {
+const getUserBooksByShelve = async (req, res, next) => {
     const token = req.cookies.jwt;
-    const payLoad = jwt.verify(token, process.env.JWT_SECRE);
-    let shelvedBooks;
-    if (req.params.shelf === 'all') {
-        shelvedBooks = await UserBook.find({ userId: payLoad.id })
-            .populate('books.bookId').select({ books: 1, _id: 0 });
-    }// pick books from a specific shelf
-    else {
-        shelvedBooks = await UserBook.find({ userId: req.payLoad.id, 'books.shelf': req.params.shelf })
-            .populate('books.bookId').select({ books: { $elemMatch: { shelf: req.params.shelf } }, _id: 0 });
+    const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
+    const pageSize = parseInt(req.query.pageSize, 10) || 5;
+    let totalPages = 0;
+    try {
+        const payLoad = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await asyncWrapper(UserBook.find({ userId: payLoad.id }));
+        const booksCount = user[1][0].books.length;
+        if ((booksCount % pageSize) === 0) {
+            const totalPage = booksCount / pageSize;
+            totalPages = parseInt(totalPage, 10);
+        } else {
+            const totalPage = booksCount / pageSize;
+            totalPages = parseInt(totalPage, 10) + 1;
+        }
+        // let shelvedBooks;
+        // if (req.params.shelf === 'all') {
+        //     shelvedBooks = await UserBook.find({ userId: payLoad.id })
+        //         .populate('books.bookId').select({ books: 1, _id: 0 });
+        // }// pick books from a specific shelf
+        // else {
+        const shelvedBooks = await UserBook
+            .find({ userId: payLoad.id, 'books.shelve': req.params.shelve })
+            .populate({
+                path: 'books.bookId',
+                select: 'name AuthorId photo rating',
+                populate: {
+                    path: 'AuthorId',
+                    select: 'firstName lastName',
+                },
+            })
+            .select({ books: { $elemMatch: { shelve: req.params.shelve } }, _id: 0 })
+            .skip((pageNumber) * pageSize)
+            .limit(pageSize)
+            .exec();
+        // }
+        return res.json({ message: 'success', data: shelvedBooks, pages: totalPages });
+    } catch (error) {
+        return res.status(500).send(error.message);
     }
-    return res.status(200).send(shelvedBooks);
 };
 
 module.exports = {
