@@ -1,8 +1,10 @@
+/* eslint-disable no-underscore-dangle */
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const checkRole = require('../middleware/checkRole');
 const asyncWrapper = require('../middleware');
+const UserBook = require('../models/userBooks');
 
 const { JWT_SECRET } = process.env;
 
@@ -18,12 +20,13 @@ const signup = async (req, res, next) => {
     });
 
     const promise = user.save();
-    const [err] = await asyncWrapper(promise);
+    const [err, data] = await asyncWrapper(promise);
 
     if (err) {
         return next(err);
     }
-    return res.json({ message: 'success' });
+    const aaaa = await UserBook.create({ userId: data._id });
+    return res.json({ message: 'success', aaaa });
 };
 
 const getAllUsers = async (req, res, next) => {

@@ -27,11 +27,11 @@ const reviewSchemma = new mongoose.Schema({
 
 const userBookSchema = new mongoose.Schema({
 
-    userId: {
-        type: mongoose.Types.ObjectId,
-        ref: 'User',
-    },
-
+    // userId: {
+    //     type: mongoose.Types.ObjectId,
+    //     ref: 'User',
+    // },
+    userId: { type: mongoose.Types.ObjectId, ref: 'User' },
     books: [reviewSchemma],
 
 });

@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-const-assign */
 /* eslint-disable no-use-before-define */
@@ -52,27 +53,22 @@ const getUserBooks = async (req, res) => {
     const token = req.cookies.jwt;
     try {
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-        console.log(decodedToken.id);
-        const result = await UserBook.paginate(
-            { userId: decodedToken.id },
-            { page: currentPage, limit: itemPerPage },
-        );
+        console.log(decodedToken);
+        // const result = await UserBook.paginate(
+        //     { userId: decodedToken._id },
+        //     { page: currentPage, limit: itemPerPage },
+        // );
+        const result = await UserBook.find({ });
+        console.log(result);
         const users = await UserBook.populate(result.docs, {
-            path: 'books.bookId',
+            path: 'userbooks.bookId',
             select: 'name AuthorId photo rating',
             populate: {
                 path: 'AuthorId',
                 select: 'firstName',
             },
         });
-        return res.json({
-            message: 'success',
-            data: users,
-            pages: result.totalPages,
-            currentPage: result.page,
-            nextPage: result.hasNextPage ? result.nextPage : null,
-            prevPage: result.hasPrevPage ? result.prevPage : null,
-        });
+        return res.json({ result });
     } catch (error) {
         res.json(error.message);
     }
@@ -112,8 +108,10 @@ const updatePushBook = async (req, res) => {
     if (!isExist) {
         return res.json({ message: 'Error Book not found' });
     }
+    console.log(idBook);
+    console.log(payLoad.id);
     const addBook = await UserBook.findOneAndUpdate(
-        { 'books.bookId': { $ne: idBook } },
+        { userId: payLoad.id, 'books.bookId': { $ne: idBook } },
         {
             $push: {
                 books: {
@@ -124,7 +122,7 @@ const updatePushBook = async (req, res) => {
                 },
             },
         },
-        await Book.findByIdAndUpdate(req.body.bookId, { $inc: { Interactions: 1 } }),
+        // await Book.findByIdAndUpdate(req.body.bookId, { $inc: { Interactions: 1 } }),
         {
             new: true,
         },
@@ -132,7 +130,7 @@ const updatePushBook = async (req, res) => {
     console.log(addBook);
     if (!addBook) {
         const condition = {
-            // userId: payLoad.id,
+            userId: payLoad.id,
             books: { $elemMatch: { bookId: idBook } },
         };
         const update = {
@@ -158,7 +156,7 @@ const updatePushBook = async (req, res) => {
         return res.json(addBook);
     }
     result = await UserBook.findOne(
-        // { userId: payLoad.id },
+        { userId: payLoad.id },
         { books: { $elemMatch: { bookId: idBook } } },
     );
     return res.json(result);
@@ -176,9 +174,10 @@ const updateAvgRate = async (idBook, rateBook, previousRate) => {
 };
 
 const deleteBook = async (req, res) => {
+    const token = req.cookies.jwt;
     const idBook = req.params.id;
     const payLoad = jwt.verify(token, process.env.JWT_SECRET);
-    const prevBook = await UserBook.findOne({ userId: payLoad.id }).select({ books: { $elemMatch: { bookId: idBook } } });
+    const prevBook = await UserBook.findOne(payLoad.id).select({ books: { $elemMatch: { bookId: idBook } } });
     const deletedBook = await UserBook.findByIdAndUpdate(
         { userId: payLoad.id, 'books.bookId': idBook },
         { $pull: { books: { bookId: idBook } } },
