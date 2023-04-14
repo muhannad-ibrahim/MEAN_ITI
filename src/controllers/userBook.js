@@ -1,3 +1,4 @@
+/* eslint-disable brace-style */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-const-assign */
@@ -209,20 +210,37 @@ const deleteBook = async (req, res) => {
     const payLoad = jwt.verify(token, process.env.JWT_SECRET);
     console.log(payLoad);
     const prevBook = await UserBook.findOne({ userId: payLoad.id }).select({ books: { $elemMatch: { bookId: idBook } } });
-    const deletedBook = await UserBook.findByIdAndUpdate(
+    const deletedBook = await UserBook.findOneAndUpdate(
         { userId: payLoad.id, 'books.bookId': idBook },
         { $pull: { books: { bookId: idBook } } },
     );
+    console.log(prevBook);
     if (!prevBook.books[0].rate) {
         return deletedBook;
     }
     console.log('lllllll');
+
     const book = await Book.findById(idBook);
     book.totalRate -= prevBook.books[0].rate;
     book.ratingNumber--;
-    book.save();
-    return prevBook;
+    await book.save();
+    return res.json(prevBook);
 };
+
+const getUserBooksByShelve = asyncFunction(async (req, res) => {
+    const token = req.cookies.jwt;
+    const payLoad = jwt.verify(token, process.env.JWT_SECRE);
+    let shelvedBooks;
+    if (req.params.shelf === 'all') {
+        shelvedBooks = await UserBook.find({ userId: payLoad.id })
+            .populate('books.bookId').select({ books: 1, _id: 0 });
+    }// pick books from a specific shelf
+    else {
+        shelvedBooks = await UserBook.find({ userId: req.payLoad.id, 'books.shelf': req.params.shelf })
+            .populate('books.bookId').select({ books: { $elemMatch: { shelf: req.params.shelf } }, _id: 0 });
+    }
+    res.status(200).send(shelvedBooks);
+});
 
 module.exports = {
     // create,
@@ -230,4 +248,5 @@ module.exports = {
     // addBookToUser,
     updatePushBook,
     deleteBook,
+    getUserBooksByShelve,
 };
