@@ -9,7 +9,7 @@ const checkRole = require('../middleware/checkRole');
 const asyncWrapper = require('../middleware');
 
 const getAllBooks = async (req, res, next) => {
-    const itemPerPage = 5;
+    const itemPerPage = parseInt(req.query.limit) || 5;
     const currentPage = parseInt(req.query.page) || 1;
     const promise = Book.paginate({}, { page: currentPage, limit: itemPerPage });
     const [err, books] = await asyncWrapper(promise);
