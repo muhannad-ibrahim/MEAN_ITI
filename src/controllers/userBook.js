@@ -1,3 +1,4 @@
+/* eslint-disable brace-style */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-const-assign */
@@ -226,10 +227,27 @@ const deleteBook = async (req, res) => {
     return res.json(prevBook);
 };
 
+const getUserBooksByShelve = asyncFunction(async (req, res) => {
+    const token = req.cookies.jwt;
+    const idBook = req.params.id;
+    const payLoad = jwt.verify(token, process.env.JWT_SECRE);
+    let shelvedBooks;
+    if (req.params.shelf === 'all') {
+        shelvedBooks = await UserBook.find({ userId: payLoad.id })
+            .populate('books.bookId').select({ books: 1, _id: 0 });
+    }// pick books from a specific shelf
+    else {
+        shelvedBooks = await UserBook.find({ userId: req.payLoad.id, 'books.shelf': req.params.shelf })
+            .populate('books.bookId').select({ books: { $elemMatch: { shelf: req.params.shelf } }, _id: 0 });
+    }
+    res.status(200).send(shelvedBooks);
+});
+
 module.exports = {
     // create,
     getUserBooks,
     // addBookToUser,
     updatePushBook,
     deleteBook,
+    getUserBooksByShelve,
 };
