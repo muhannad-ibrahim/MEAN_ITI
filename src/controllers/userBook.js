@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 /* eslint-disable no-const-assign */
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-empty */
@@ -14,150 +15,184 @@ const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'test';
 
-const create = async (req, res, next) => {
-    const userId = req.body.UserId;
-    const { bookId } = req.body;
+// const create = async (req, res, next) => {
+//     const bookId = req.query.id;
 
-    const userPromise = User.findById(userId).exec();
-    const [userErr, user] = await asyncWrapper(userPromise);
-    if (userErr) {
-        return next(userErr);
-    }
+//     const userPromise = User.findById(userId).exec();
+//     const [userErr, user] = await asyncWrapper(userPromise);
+//     if (userErr) {
+//         return next(userErr);
+//     }
 
-    if (!user) {
-        return res.status(404).send({ message: 'User not found' });
-    }
+//     if (!user) {
+//         return res.status(404).send({ message: 'User not found' });
+//     }
 
-    const bookPromise = Book.findById(bookId).exec();
-    const [bookErr, book] = await asyncWrapper(bookPromise);
-    if (bookErr) {
-        return next(bookErr);
-    }
+//     const bookPromise = Book.findById(bookId).exec();
+//     const [bookErr, book] = await asyncWrapper(bookPromise);
+//     if (bookErr) {
+//         return next(bookErr);
+//     }
 
-    if (!book) {
-        return res.status(404).send({ message: 'Book not found' });
-    }
+//     if (!book) {
+//         return res.status(404).send({ message: 'Book not found' });
+//     }
+//     const savePromise = userBook.save();
+//     const [saveErr] = await asyncWrapper(savePromise);
+//     if (saveErr) {
+//         return next(saveErr);
+//     }
 
-    // const userBook = new UserBook({
-    //     UserId: userId,
-    //     books: [
-    //         { bookId:'', reviewerName: 'user1', comment: 'Great book!', rate: 5 },
-    //         { bookId:'', reviewerName: 'user2', comment: 'I enjoyed it.', rate: 4 },
-    //     ],
-    // });
-
-    const savePromise = userBook.save();
-    const [saveErr] = await asyncWrapper(savePromise);
-    if (saveErr) {
-        return next(saveErr);
-    }
-
-    return res.json({ message: 'success' });
-};
+//     return res.json({ message: 'success' });
+// };
 
 const getUserBooks = async (req, res) => {
-    console.log('ddddd');
     const currentPage = parseInt(req.query.page) || 1;
     const itemPerPage = 5;
     const token = req.cookies.jwt;
-    let decodedToken;
     try {
-        const token = req.cookies.jwt;
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-        const users = await UserBook.paginate({}, { page: currentPage, limit: itemPerPage })
-            .findById(decodedToken.id)
-            .populate({
-                path: 'books.bookId',
-                select: 'name AuthorId photo rating',
-                populate: {
-                    path: 'AuthorId',
-                    select: 'firstName',
-                },
-            });
+        const result = await UserBook.paginate(
+            { userId: decodedToken.id },
+            { page: currentPage, limit: itemPerPage },
+        );
+        const users = await UserBook.populate(result.docs, {
+            path: 'books.bookId',
+            select: 'name AuthorId photo rating',
+            populate: {
+                path: 'AuthorId',
+                select: 'firstName',
+            },
+        });
         return res.json({
             message: 'success',
-            data: users.docs,
-            pages: users.totalPages,
-            currentPage: users.page,
-            nextPage: users.hasNextPage ? users.nextPage : null,
-            prevPage: users.hasPrevPage ? users.prevPage : null,
+            data: users,
+            pages: result.totalPages,
+            currentPage: result.page,
+            nextPage: result.hasNextPage ? result.nextPage : null,
+            prevPage: result.hasPrevPage ? result.prevPage : null,
         });
     } catch (error) {
         res.json(error.message);
     }
 };
 
-const addBookToUser = async (req, res, next) => {
-    const bookId = req.params.id;
-    const token = req.cookies.jwt;
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const userPromise = User.findById(decodedToken.id);
-    const [userErr, user] = await asyncWrapper(userPromise);
-    if (userErr) {
-        return next({ message: 'Error finding user' });
-    }
+// const addBookToUser = async (req, res, next) => {
+//     let result;
+//     const bookId = req.params.id;
+//     const token = req.cookies.jwt;
+//     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+//     const userPromise = User.findById(decodedToken.id);
+//     const [userErr, user] = await asyncWrapper(userPromise);
+//     if (userErr) {
+//         return next({ message: 'Error finding user' });
+//     }
 
-    user.books.push({ bookId });
-    const saveUserPromise = user.save();
-    const [saveErr] = await asyncWrapper(saveUserPromise);
-    if (saveErr) {
-        return next({ message: 'Error saving user while adding book' });
-    }
+//     user.books.push({ bookId });
+//     const saveUserPromise = user.save();
+//     const [saveErr] = await asyncWrapper(saveUserPromise);
+//     if (saveErr) {
+//         return next({ message: 'Error saving user while adding book' });
+//     }
 
-    res.status(200).json({ message: 'Book added to user successfully' });
-};
+//     res.status(200).json({ message: 'Book added to user successfully' });
+// };
 
 const updatePushBook = async (req, res) => {
     const token = req.cookies.jwt;
     const payLoad = jwt.verify(token, process.env.JWT_SECRET);
-    const idBook = req.query.id;
+    const idBook = req.params.id;
     const rateBook = req.body.rate;
     const shelveBook = req.body.shelve;
     const commentBook = req.body.comment;
     let previousRate = 0;
-    const addBook = await UserBook.findByIdAndUpdate(
-        { UserId: payLoad.id, 'books.bookId': { $ne: idBook } },
+
+    const isExist = await Book.findById(idBook);
+    if (!isExist) {
+        return res.json({ message: 'Error Book not found' });
+    }
+    const addBook = await UserBook.findOneAndUpdate(
+        { userId: payLoad.id, 'books.bookId': { $ne: idBook } },
         {
             $push: {
                 books: {
-                    bookId: idBook, rate: rateBook, comment: commentBook, shelve: shelveBook,
+                    bookId: idBook,
+                    rate: rateBook,
+                    comment: commentBook,
+                    shelve: shelveBook,
                 },
             },
         },
         {
             new: true,
         },
-    ).select({ books: { $elemMatch: { boodkId: idBook } } });
+    );
+    console.log(addBook);
     if (!addBook) {
         const condition = {
             userId: payLoad.id,
-            bookId: { $elemMatch: { boodkId: idBook } },
+            books: { $elemMatch: { bookId: idBook } },
         };
-        const upddate = {
-            $set: { 'books.$.rate': rateBook, 'books.$.shelve': shelveBook },
+        const update = {
+            $set: {
+                'books.$.rate': rateBook,
+                'books.$.shelve': shelveBook,
+            },
         };
-        const result = await UserBook.findByIdAndUpdate(condition, upddate).select({ books: { $elemMatch: { boodkId: idBook } } });
-        previousRate = result.books.rate;
+        const result = await UserBook.findOneAndUpdate(condition, update).select({ books: { $elemMatch: { bookId: idBook } } });
+        console.log(result);
+        if (result) {
+            previousRate = result.books[0].rate;
+        }
     }
+
     if (rateBook) {
         updateAvgRate(idBook, rateBook, previousRate);
     }
-    if (addBook) return addBook;
-    result = await UserBook.findOne({ userId: payLoad.id }).select({ books: { $elemMatch: { bookId: idBook } } });
-    return result;
+
+    if (addBook) {
+        return res.json(addBook);
+    }
+    result = await UserBook.findOne(
+        { userId: payLoad.id },
+        { books: { $elemMatch: { bookId: idBook } } },
+    );
+    return res.json(result);
 };
 
-// const updateAvgRate = async (idBook, rateBook, previousRate) => {
-//     const reqBook = await Book.findById(idBook);
-//     if (reqBook.rate) {
-//         Book.updateOne(idBook, {$set:{book}})
-//     } else {
-//     }
-// };
+const updateAvgRate = async (idBook, rateBook, previousRate) => {
+    const reqBook = await Book.findById(idBook);
+    if (previousRate) {
+        reqBook.totalRate = (reqBook.totalRate - previousRate) + Number(rateBook);
+    } else {
+        reqBook.ratingNumber++;
+        reqBook.totalRate += Number(rateBook);
+    }
+    reqBook.save();
+};
+
+const deleteBook = async (req, res) => {
+    const idBook = req.params.id;
+    const payLoad = jwt.verify(token, process.env.JWT_SECRET);
+    const prevBook = await UserBook.findOne({ userId: payLoad.id }).select({ books: { $elemMatch: { bookId: idBook } } });
+    const deletedBook = await UserBook.findByIdAndUpdate(
+        { userId: payLoad.id, 'books.bookId': idBook },
+        { $pull: { books: { bookId: idBook } } },
+    );
+    if (!prevBook.books[0].rate) {
+        return deletedBook;
+    }
+    const book = await Book.findById(filter.bookId);
+    book.totalRating -= oldBook.books[0].rate;
+    book.ratingNumber--;
+    book.save();
+    return oldBook;
+};
 
 module.exports = {
-    create,
+    // create,
     getUserBooks,
-    addBookToUser,
+    // addBookToUser,
     updatePushBook,
+    deleteBook,
 };

@@ -22,23 +22,46 @@ const getAllAuthors = async (req, res, next) => {
     return res.json({ message: 'success', data: authors });
 };
 
+// const getAuthorsPagination = async (req, res, next) => {
+//     const authorperPage = 5;
+//     const currentPage = parseInt(req.query.page) || 1;
+//     const [error, authors] = await asyncWrapper(Author.paginate({}, { page: currentPage, limit: authorperPage }));
+//     if (error) {
+//         return next(error);
+//     }
+//     if (authors.docs.length === 0) {
+//         return res.status(404).json({ message: 'There are no authors' });
+//     }
+//     return res.json({
+//         message: 'success',
+//         data: authors.docs,
+//         pages: authors.totalPages,
+//         currentPage: authors.page,
+//         nextPage: authors.hasNextPage ? authors.nextPage : null,
+//         prevPage: authors.hasPrevPage ? authors.prevPage : null,
+//     });
+// };
+
 const getAuthorsPagination = async (req, res, next) => {
-    const authorperPage = 5;
-    const currentPage = parseInt(req.query.page) || 1;
-    const [error, authors] = await asyncWrapper(Author.paginate({}, { page: currentPage, limit: authorperPage }));
+    const authorsCount = await asyncWrapper(Author.find({}).count());
+    const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
+    const pageSize = parseInt(req.query.pageSize, 10) || 6;
+    const [error, authors] = await asyncWrapper(Author
+        .find()
+        .skip((pageNumber) * pageSize)
+        .limit(pageSize)
+        .exec());
+
     if (error) {
         return next(error);
     }
-    if (authors.docs.length === 0) {
+    if (authors.length === 0) {
         return res.status(404).json({ message: 'There are no authors' });
     }
     return res.json({
         message: 'success',
-        data: authors.docs,
-        pages: authors.totalPages,
-        currentPage: authors.page,
-        nextPage: authors.hasNextPage ? authors.nextPage : null,
-        prevPage: authors.hasPrevPage ? authors.prevPage : null,
+        data: authors,
+        pages: authorsCount,
     });
 };
 

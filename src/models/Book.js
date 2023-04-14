@@ -1,45 +1,70 @@
+/* eslint-disable func-names */
 const mongoose = require('mongoose');
 const mongoosePagination = require('mongoose-paginate-v2');
 
-const bookSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: [true, 'Please enter a book title'],
-        unique: [true, 'Book title already exists'],
+const bookSchema = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: [true, 'Please enter a book title'],
+            unique: [true, 'Book title already exists'],
+        },
+        categoryId: {
+            type: mongoose.Types.ObjectId,
+            ref: 'Category',
+            required: [true, 'Please enter a category'],
+        },
+        AuthorId: {
+            type: mongoose.Types.ObjectId,
+            ref: 'Author',
+            required: [true, 'Please enter an author'],
+        },
+        totalRate: {
+            type: Number,
+            default: 0,
+        },
+        ratingNumber: {
+            type: Number,
+            default: 0,
+        },
+        photo: {
+            type: String,
+        },
+        rating: {
+            type: Number,
+            min: 0,
+            max: 5,
+            default: 0,
+        },
+        popularity: {
+            type: Number,
+            default: 0,
+        },
+        Interactions: {
+            type: Number,
+            default: 0,
+        },
     },
-    categoryId: {
-        type: mongoose.Types.ObjectId,
-        ref: 'Category',
-        required: [true, 'Please enter a category'],
+    {
+        timestamps: true,
     },
-    AuthorId: {
-        type: mongoose.Types.ObjectId,
-        ref: 'Author',
-        required: [true, 'Please enter an author'],
+    {
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true },
     },
-    totalRate: {
-        type: Number,
-        default: 0,
-    },
-    raringNumber: {
-        type: Number,
-        default: 0,
-    },
-    photo: {
-        type: String,
-    },
-    rating: {
-        type: Number,
-        min: 0,
-        max: 5,
-        default: 0,
-    },
-}, {
-    timestamps: true,
-});
+);
 
 bookSchema.plugin(mongoosePagination);
 
 const Book = mongoose.model('Book', bookSchema);
+
+bookSchema.methods.calculatePopularity = function () {
+    this.popularity = (this.totalRate / this.ratingNumber) * this.Interactions;
+    return this.save();
+};
+bookSchema.virtual('averageRating').get(function () {
+    this.calculatePopularity();
+    return this.sumOfRatings / this.numberOfRatings;
+});
 
 module.exports = Book;
