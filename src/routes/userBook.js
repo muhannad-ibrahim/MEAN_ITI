@@ -5,7 +5,8 @@ const { userBookController } = require('../controllers');
 
 router.use(cookieParser());
 
-router.post('/', userBookController.create);
+// router.post('/:id', userBookController.create);
 router.get('/', userBookController.getUserBooks);
 router.patch('/:id', userBookController.updatePushBook);
+router.delete('/:id', userBookController.deleteBook);
 module.exports = router;

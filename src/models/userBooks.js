@@ -27,7 +27,7 @@ const reviewSchemma = new mongoose.Schema({
 
 const userBookSchema = new mongoose.Schema({
 
-    UserId: {
+    userId: {
         type: mongoose.Types.ObjectId,
         ref: 'User',
     },
