@@ -54,10 +54,6 @@ const getUserBooks = async (req, res) => {
     try {
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
         console.log(decodedToken);
-        // const result = await UserBook.paginate(
-        //     { userId: decodedToken._id },
-        //     { page: currentPage, limit: itemPerPage },
-        // );
         const result = await UserBook.find({ });
         console.log(result);
         const users = await UserBook.populate(result.docs, {
@@ -68,7 +64,16 @@ const getUserBooks = async (req, res) => {
                 select: 'firstName',
             },
         });
-        return res.json({ result });
+        console.log(result);
+        // return res.json({
+        //     message: 'success',
+        //     data: users,
+        //     pages: users.totalPages,
+        //     currentPage: users.page,
+        //     nextPage: users.hasNextPage ? users.nextPage : null,
+        //     prevPage: users.hasPrevPage ? users.prevPage : null,
+        // });
+        return res.json(result);
     } catch (error) {
         res.json(error.message);
     }
@@ -177,7 +182,8 @@ const deleteBook = async (req, res) => {
     const token = req.cookies.jwt;
     const idBook = req.params.id;
     const payLoad = jwt.verify(token, process.env.JWT_SECRET);
-    const prevBook = await UserBook.findOne(payLoad.id).select({ books: { $elemMatch: { bookId: idBook } } });
+    console.log(payLoad);
+    const prevBook = await UserBook.findOne({ userId: payLoad.id }).select({ books: { $elemMatch: { bookId: idBook } } });
     const deletedBook = await UserBook.findByIdAndUpdate(
         { userId: payLoad.id, 'books.bookId': idBook },
         { $pull: { books: { bookId: idBook } } },
@@ -185,11 +191,12 @@ const deleteBook = async (req, res) => {
     if (!prevBook.books[0].rate) {
         return deletedBook;
     }
-    const book = await Book.findById(filter.bookId);
-    book.totalRate -= oldBook.books[0].rate;
+    console.log('lllllll');
+    const book = await Book.findById(idBook);
+    book.totalRate -= prevBook.books[0].rate;
     book.ratingNumber--;
     book.save();
-    return oldBook;
+    return prevBook;
 };
 
 module.exports = {
