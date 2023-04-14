@@ -42,21 +42,15 @@ const bookSchema = new mongoose.Schema(
         },
         Interactions: {
             type: Number,
-            default: 0,
+            default: 1,
         },
     },
     {
         timestamps: true,
-    },
-    {
         toJSON: { virtuals: true },
         toObject: { virtuals: true },
     },
 );
-
-bookSchema.plugin(mongoosePagination);
-
-const Book = mongoose.model('Book', bookSchema);
 
 bookSchema.methods.calculatePopularity = function () {
     this.popularity = (this.totalRate / this.ratingNumber) * this.Interactions;
@@ -64,7 +58,11 @@ bookSchema.methods.calculatePopularity = function () {
 };
 bookSchema.virtual('averageRating').get(function () {
     this.calculatePopularity();
-    return this.sumOfRatings / this.numberOfRatings;
+    return this.totalRate / this.ratingNumber;
 });
+
+bookSchema.plugin(mongoosePagination);
+
+const Book = mongoose.model('Book', bookSchema);
 
 module.exports = Book;

@@ -52,6 +52,7 @@ const getUserBooks = async (req, res) => {
     const token = req.cookies.jwt;
     try {
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+        console.log(decodedToken.id);
         const result = await UserBook.paginate(
             { userId: decodedToken.id },
             { page: currentPage, limit: itemPerPage },
@@ -112,37 +113,40 @@ const updatePushBook = async (req, res) => {
         return res.json({ message: 'Error Book not found' });
     }
     const addBook = await UserBook.findOneAndUpdate(
-        { userId: payLoad.id, 'books.bookId': { $ne: idBook } },
+        { 'books.bookId': { $ne: idBook } },
         {
             $push: {
                 books: {
                     bookId: idBook,
-                    rate: rateBook,
                     comment: commentBook,
+                    rate: rateBook,
                     shelve: shelveBook,
                 },
             },
         },
+        await Book.findByIdAndUpdate(req.body.bookId, { $inc: { Interactions: 1 } }),
         {
             new: true,
         },
-    );
+    ).select({ books: { $elemMatch: { bookId: idBook } } });
     console.log(addBook);
     if (!addBook) {
         const condition = {
-            userId: payLoad.id,
+            // userId: payLoad.id,
             books: { $elemMatch: { bookId: idBook } },
         };
         const update = {
             $set: {
                 'books.$.rate': rateBook,
                 'books.$.shelve': shelveBook,
+                'books.$.comment': commentBook,
             },
         };
         const result = await UserBook.findOneAndUpdate(condition, update).select({ books: { $elemMatch: { bookId: idBook } } });
         console.log(result);
         if (result) {
             previousRate = result.books[0].rate;
+            console.log(previousRate);
         }
     }
 
@@ -154,7 +158,7 @@ const updatePushBook = async (req, res) => {
         return res.json(addBook);
     }
     result = await UserBook.findOne(
-        { userId: payLoad.id },
+        // { userId: payLoad.id },
         { books: { $elemMatch: { bookId: idBook } } },
     );
     return res.json(result);
@@ -183,7 +187,7 @@ const deleteBook = async (req, res) => {
         return deletedBook;
     }
     const book = await Book.findById(filter.bookId);
-    book.totalRating -= oldBook.books[0].rate;
+    book.totalRate -= oldBook.books[0].rate;
     book.ratingNumber--;
     book.save();
     return oldBook;

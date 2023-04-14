@@ -126,9 +126,18 @@ const deleteBookById = async (req, res, next) => {
     return res.json({ message: 'success', book });
 };
 const popularBook = async (req, res) => {
-    const mostPopularBook = await Book.find().sort({ popularity: -1 }).limit(1);
-    return res.json(mostPopularBook);
+    console.log('dddddd');
+    try {
+        const mostPopularBook = await Book.find({}).sort({ popularity: -1 }).limit(1);
+        if (mostPopularBook.length === 0) {
+            return res.status(404).json({ message: 'No books found' });
+        }
+        return res.json(mostPopularBook);
+    } catch (error) {
+        return res.status(500).json({ message: 'Internal server error' });
+    }
 };
+
 module.exports = {
     createBook,
     getAllBooks,
