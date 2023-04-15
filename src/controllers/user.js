@@ -151,7 +151,7 @@ const login = async (req, res, next) => {
 
     const token = jwt.sign({ email, id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '4h' });
     try {
-        res.cookie('jwt', token, { httpOnly: true, secure: true, maxAge: 1000 * 60 * 60 * 4 });
+        res.cookie('jwt', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 4 });
     } catch (error) {
         return res.json({ message: 'error' });
     }
