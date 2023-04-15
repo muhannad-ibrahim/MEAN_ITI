@@ -107,12 +107,8 @@ const updateAuthorById = async (req, res, next) => {
     author.firstName = req.body.firstName || author.firstName;
     author.lastName = req.body.lastName || author.lastName;
     if (req.file) {
-        try {
-            const imageURL = await cloudinary.uploader.upload(req.file.path);
-            author.photo = imageURL.secure_url;
-        } catch (error) {
-            return next(error);
-        }
+        const imageURL = await cloudinary.uploader.upload(req.file.path);
+        author.photo = imageURL.secure_url;
     }
     author.dob = req.body.dob || author.dob;
     author.bio = req.body.bio || author.bio;

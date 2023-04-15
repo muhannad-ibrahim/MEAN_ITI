@@ -144,7 +144,10 @@ const login = async (req, res, next) => {
         return next({ message: 'UNAUTHENTICATED to login' });
     }
 
-    const token = jwt.sign({ email, id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '4h' });
+    const token = jwt.sign({
+        firstName: user.firstName, lastName: user.lastName, email, id: user.id, role: user.role,
+    }, JWT_SECRET, { expiresIn: '4h' });
+
     try {
         res.cookie('jwt', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 4 });
     } catch (error) {
