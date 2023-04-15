@@ -24,7 +24,7 @@ const app = express();
 const corsOptions = {
     origin: ['https://endless-books.netlify.app', 'http://localhost:4200'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    Credentials: true,
+    credentials: true,
 };
 app.use(cookieParser());
 
