@@ -9,10 +9,8 @@ const helmet = require('helmet');
 const hpp = require('hpp');
 const dotenv = require('dotenv');
 const dbConnection = require('./src/db');
-const asyncWrapper = require('./src/middleware');
 
 // connecting with cluster MongoDB
-// const MongoDB = require('mongodb').MongoClient;
 const router = require('./src/routes');
 
 // Loading environment variables
@@ -24,9 +22,19 @@ const app = express();
 
 // Middleware for CORS policy
 const corsOptions = {
+    origin: ['https://endless-books.netlify.app', 'http://localhost:4200'],
     credentials: true,
-    origin: 'http://localhost:4200',
 };
+app.use(cookieParser());
+
+// Middleware for sanitizing data against NoSQL query injection
+app.use(mongoSanitize());
+
+// Middleware for setting security HTTP headers
+app.use(helmet());
+
+// Prevent http param pollution
+app.use(hpp());
 app.use(cors(corsOptions));
 
 // Middleware for parsing urlencoded data
@@ -40,16 +48,6 @@ app.use((err, req, res, next) => res.status(err.statusCode || 400).json(
         message: err.message,
     },
 ));
-app.use(cookieParser());
-
-// Middleware for sanitizing data against NoSQL query injection
-app.use(mongoSanitize());
-
-// Middleware for setting security HTTP headers
-app.use(helmet());
-
-// Prevent http param pollution
-app.use(hpp());
 
 // Establishing connection with database
 async function main() {
