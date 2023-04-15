@@ -21,6 +21,7 @@ router.get('/', authorController.getAuthorsPagination);
 router.get('/all', authorController.getAllAuthors);
 
 router.post('/', upload.single('photo'), authorController.createAuthor);
+router.get('/popularity', authorController.popularAuthor);
 router.get('/:AuthorId', authorController.getAllAuthorsBooks);
 router.get('/:id', authorController.getAuthorById);
 router.patch('/:id', upload.single('photo'), authorController.updateAuthorById);
