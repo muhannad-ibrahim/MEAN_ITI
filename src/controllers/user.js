@@ -25,7 +25,7 @@ const signup = async (req, res, next) => {
         email: req.body.email,
         password: req.body.password,
         role: req.body.role,
-        photo: imageURL,
+        photo: imageURL.secure_url,
     });
 
     const promise = user.save();

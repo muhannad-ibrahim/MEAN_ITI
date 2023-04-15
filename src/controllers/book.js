@@ -5,33 +5,8 @@
 const fs = require('fs');
 const Book = require('../models/Book');
 const checkRole = require('../middleware/checkRole');
-// const Category = require('../models/Category');
 const asyncWrapper = require('../middleware');
 const cloudinary = require('../utils/cloudinary');
-
-// const getAllBooks = async (req, res, next) => {
-//     const itemPerPage = parseInt(req.query.limit) || 5;
-//     const currentPage = parseInt(req.query.page) || 1;
-//     const promise = Book.paginate({}, { page: currentPage, limit: itemPerPage });
-//     const [err, books] = await asyncWrapper(promise);
-
-//     if (err) {
-//         return next(err);
-//     }
-
-//     if (books.docs.length === 0) {
-//         return res.status(404).json({ message: 'There are no books' });
-//     }
-
-//     return res.json({
-//         message: 'success',
-//         data: books.docs,
-//         pages: books.totalPages,
-//         currentPage: books.page,
-//         nextPage: books.hasNextPage ? books.nextPage : null,
-//         prevPage: books.hasPrevPage ? books.prevPage : null,
-//     });
-// };
 
 const getAllBooks = async (req, res, next) => {
     const booksCount = await asyncWrapper(Book.countDocuments().exec());
@@ -73,10 +48,10 @@ const getAllBooks = async (req, res, next) => {
 };
 
 const createBook = async (req, res, next) => {
-    const isUserAdmin = await checkRole.isAdmin(req);
-    if (!isUserAdmin) {
-        return res.status(401).json({ message: 'You are not an admin' });
-    }
+    // const isUserAdmin = await checkRole.isAdmin(req);
+    // if (!isUserAdmin) {
+    //     return res.status(401).json({ message: 'You are not an admin' });
+    // }
     let imageURL = '';
     if (req.file) {
         try {
@@ -89,7 +64,7 @@ const createBook = async (req, res, next) => {
         name: req.body.name,
         categoryId: req.body.categoryId,
         AuthorId: req.body.AuthorId,
-        photo: imageURL,
+        photo: imageURL.secure_url,
     });
 
     const promise = book.save();
