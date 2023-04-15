@@ -50,10 +50,22 @@ const { JWT_SECRET } = process.env;
 // };
 
 const getUserBooks = async (req, res, next) => {
-    const token = req.cookies.jwt;
+    let token;
+    if (
+        req.headers.authorization
+          && req.headers.authorization.startsWith('Bearer')
+    ) {
+        // eslint-disable-next-line prefer-destructuring
+        token = req.headers.authorization.split(' ')[1];
+    }
+    else {
+        token = req.cookies.jwt;
+    }
+
     if (!token) {
         return res.json({ message: 'Error token not found' });
     }
+
     const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
     const pageSize = parseInt(req.query.pageSize, 10) || 5;
     let totalPages = 0;
@@ -89,7 +101,18 @@ const getUserBooks = async (req, res, next) => {
 };
 
 const updatePushBook = async (req, res) => {
-    const token = req.cookies.jwt;
+    let token;
+    if (
+        req.headers.authorization
+          && req.headers.authorization.startsWith('Bearer')
+    ) {
+        // eslint-disable-next-line prefer-destructuring
+        token = req.headers.authorization.split(' ')[1];
+    }
+    else {
+        token = req.cookies.jwt;
+    }
+
     if (!token) {
         return res.json({ message: 'Error token not found' });
     }
@@ -165,7 +188,18 @@ const updateAvgRate = async (idBook, rateBook, previousRate) => {
 };
 
 const deleteBook = async (req, res) => {
-    const token = req.cookies.jwt;
+    let token;
+    if (
+        req.headers.authorization
+          && req.headers.authorization.startsWith('Bearer')
+    ) {
+        // eslint-disable-next-line prefer-destructuring
+        token = req.headers.authorization.split(' ')[1];
+    }
+    else {
+        token = req.cookies.jwt;
+    }
+
     if (!token) {
         return res.json({ message: 'Error token not found' });
     }
@@ -188,7 +222,18 @@ const deleteBook = async (req, res) => {
 };
 
 const getUserBooksByShelve = async (req, res, next) => {
-    const token = req.cookies.jwt;
+    let token;
+    if (
+        req.headers.authorization
+          && req.headers.authorization.startsWith('Bearer')
+    ) {
+        // eslint-disable-next-line prefer-destructuring
+        token = req.headers.authorization.split(' ')[1];
+    }
+    else {
+        token = req.cookies.jwt;
+    }
+
     if (!token) {
         return res.json({ message: 'Error token not found' });
     }

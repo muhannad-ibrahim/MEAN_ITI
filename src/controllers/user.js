@@ -162,16 +162,30 @@ const login = async (req, res, next) => {
 };
 
 const getUserProfile = async (req, res, next) => {
-    const cookie = req.cookies.jwt;
-
-    let payload;
-    try {
-        payload = jwt.verify(cookie, JWT_SECRET);
-    } catch (err) {
-        return next({ message: 'UNAUTHENTICATED to get user profile' });
+    let token;
+    if (
+        req.headers.authorization
+          && req.headers.authorization.startsWith('Bearer')
+    ) {
+        // eslint-disable-next-line prefer-destructuring
+        token = req.headers.authorization.split(' ')[1];
+    } else {
+        token = req.cookies.jwt;
     }
 
-    const promise = User.findOne({ email: payload.email }).exec();
+    if (!token) {
+        return res.json({ message: 'Error token not found' });
+    }
+    // const cookie = req.cookies.jwt;
+
+    // let payload;
+    // try {
+    //     payload = jwt.verify(cookie, JWT_SECRET);
+    // } catch (err) {
+    //     return next({ message: 'UNAUTHENTICATED to get user profile' });
+    // }
+
+    const promise = User.findOne({ email: token.email }).exec();
     const [err, user] = await asyncWrapper(promise);
 
     if (err) {
