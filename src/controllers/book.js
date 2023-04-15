@@ -76,8 +76,14 @@ const createBook = async (req, res, next) => {
     if (!isUserAdmin) {
         return res.status(401).json({ message: 'You are not an admin' });
     }
-
-    const imageURL = `${req.protocol}://${req.headers.host}/bookImg/${req.file.filename}`;
+    let imageURL = '';
+    if (req.file) {
+        try {
+            imageURL = await cloudinary.uploader.upload(req.file.path);
+        } catch (error) {
+            return next(error);
+        }
+    }
     const book = new Book({
         name: req.body.name,
         categoryId: req.body.categoryId,

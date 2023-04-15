@@ -12,8 +12,12 @@ const { JWT_SECRET } = process.env;
 
 const signup = async (req, res, next) => {
     let imageURL = '';
-    if (req.file) {
-        imageURL = await cloudinary.uploader.upload(req.file.path);
+    try {
+        if (req.file) {
+            imageURL = await cloudinary.uploader.upload(req.file.path);
+        }
+    } catch (error) {
+        return next(error);
     }
     const user = new User({
         firstName: req.body.firstName,
