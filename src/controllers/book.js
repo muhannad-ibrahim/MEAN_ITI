@@ -122,15 +122,8 @@ const updateBookById = async (req, res, next) => {
     book.categoryId = req.body.categoryId;
     book.AuthorId = req.body.AuthorId;
     if (req.file) {
-        const filename = book.photo.split('/').pop();
-        const path = './images/bookImg/';
-        console.log(filename);
-        if (fs.existsSync(path + filename)) {
-            console.log('file exists');
-            fs.unlinkSync(path + filename);
-        }
-        const imageURL = `${req.protocol}://${req.headers.host}/bookImg/${req.file.filename}`;
-        book.photo = imageURL;
+        const imageURL = await cloudinary.uploader.upload(req.file.path);
+        book.photo = imageURL.secure_url;
     }
     const promise = book.save();
     const [err, savedBook] = await asyncWrapper(promise);
@@ -157,15 +150,6 @@ const deleteBookById = async (req, res, next) => {
 
     if (!book) {
         return next({ message: 'Book not found' });
-    }
-
-    const filename = book.photo.split('/').pop();
-    const path = './images/bookImg/';
-    if (fs.existsSync(path + filename)) {
-        console.log('file exists');
-        fs.unlinkSync(path + filename);
-    } else {
-        console.log('file not found!');
     }
 
     return res.json({ message: 'success', book });

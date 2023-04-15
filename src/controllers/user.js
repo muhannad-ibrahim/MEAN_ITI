@@ -1,9 +1,9 @@
 /* eslint-disable no-underscore-dangle */
-const fs = require('fs');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/User');
 const UserBook = require('../models/userBooks');
+const cloudinary = require('../utils/cloudinary');
 
 const asyncWrapper = require('../middleware');
 const checkRole = require('../middleware/checkRole');
@@ -11,7 +11,10 @@ const checkRole = require('../middleware/checkRole');
 const { JWT_SECRET } = process.env;
 
 const signup = async (req, res, next) => {
-    const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
+    let imageURL = '';
+    if (req.file) {
+        imageURL = await cloudinary.uploader.upload(req.file.path);
+    }
     const user = new User({
         firstName: req.body.firstName,
         lastName: req.body.lastName,
@@ -116,16 +119,6 @@ const deleteUserById = async (req, res, next) => {
 
     if (!user) {
         return next({ message: 'User not found' });
-    }
-
-    const filename = user.photo.split('/').pop();
-    const path = './images/';
-
-    if (fs.existsSync(path + filename)) {
-        console.log('file exists');
-        fs.unlinkSync(path + filename);
-    } else {
-        console.log('file not found!');
     }
 
     return res.json({ message: 'success', user });

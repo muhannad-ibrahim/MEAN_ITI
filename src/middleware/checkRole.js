@@ -13,10 +13,8 @@ const isAdmin = async (req) => {
             req.headers.authorization
               && req.headers.authorization.startsWith('Bearer')
         ) {
-            // Set token from Bearer token in header
             // eslint-disable-next-line prefer-destructuring
             token = req.headers.authorization.split(' ')[1];
-            // Set token from cookie
         }
         if (!token) {
             return false;

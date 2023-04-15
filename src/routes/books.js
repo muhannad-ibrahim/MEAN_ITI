@@ -8,9 +8,9 @@ router.use(cookieParser());
 /* eslint-disable comma-dangle */
 
 const storage = multer.diskStorage({
-    destination: './images/bookImg',
+    destination: './images',
     filename: (req, file, cb) => {
-        cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
+        cb(null, `book_${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
     }
 });
 

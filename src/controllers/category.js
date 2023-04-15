@@ -19,31 +19,6 @@ const getAllCategories = async (req, res, next) => {
     return res.json({ message: 'success', data: categories });
 };
 
-// const getCategoriesPagination = async (req, res, next) => {
-//     const currentPage = parseInt(req.query.page) || 1;
-//     const itemPerPage = 5;
-
-//     const promise = Category.paginate({}, { page: currentPage, limit: itemPerPage });
-//     const [err, categories] = await asyncWrapper(promise);
-
-//     if (err) {
-//         return next(err);
-//     }
-
-//     if (categories.docs.length === 0) {
-//         return next({ message: 'There is no categories' });
-//     }
-
-//     return res.json({
-//         message: 'success',
-//         data: categories.docs,
-//         pages: categories.totalPages,
-//         currentPage: categories.page,
-//         nextPage: categories.hasNextPage ? categories.nextPage : null,
-//         prevPage: categories.hasPrevPage ? categories.prevPage : null,
-//     });
-// };
-
 const getCategoriesPagination = async (req, res, next) => {
     const categoriesCount = await asyncWrapper(Category.countDocuments().exec());
     const pageNumber = parseInt(req.query.pageNumber, 10) || 0;

@@ -8,6 +8,8 @@
 const fs = require('fs');
 const Author = require('../models/Author');
 const Book = require('../models/Book');
+const cloudinary = require('../utils/cloudinary');
+
 const checkRole = require('../middleware/checkRole');
 const asyncWrapper = require('../middleware');
 
@@ -64,8 +66,12 @@ const createAuthor = async (req, res, next) => {
         bio: req.body.bio,
     };
     if (req.file) {
-        const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
-        authorData.photo = imageURL;
+        try {
+            const imageURL = await cloudinary.uploader.upload(req.file.path);
+            authorData.photo = imageURL.secure_url;
+        } catch (error) {
+            return next(error);
+        }
     }
     const [error, savedAuthor] = await asyncWrapper(new Author(authorData).save());
     if (error) {
@@ -101,14 +107,12 @@ const updateAuthorById = async (req, res, next) => {
     author.firstName = req.body.firstName || author.firstName;
     author.lastName = req.body.lastName || author.lastName;
     if (req.file) {
-        const filename = author.photo.split('/').pop();
-        const path = './images/';
-        if (fs.existsSync(path + filename)) {
-            console.log('file exists');
-            fs.unlinkSync(path + filename);
+        try {
+            const imageURL = await cloudinary.uploader.upload(req.file.path);
+            author.photo = imageURL.secure_url;
+        } catch (error) {
+            return next(error);
         }
-        const imageURL = `${req.protocol}://${req.headers.host}/${req.file.filename}`;
-        author.photo = imageURL;
     }
     author.dob = req.body.dob || author.dob;
     author.bio = req.body.bio || author.bio;
@@ -131,14 +135,6 @@ const deleteAuthorById = async (req, res, next) => {
     const [error, author] = await asyncWrapper(Author.findByIdAndRemove(req.params.id));
     if (error) {
         return next(error);
-    }
-    const filename = author.photo.split('/').pop();
-    const path = './images/';
-    if (fs.existsSync(path + filename)) {
-        console.log('file exists');
-        fs.unlinkSync(path + filename);
-    } else {
-        console.log('file not found!');
     }
     return res.json({ message: 'success', data: author });
 };
