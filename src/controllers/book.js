@@ -7,6 +7,7 @@ const Book = require('../models/Book');
 const checkRole = require('../middleware/checkRole');
 // const Category = require('../models/Category');
 const asyncWrapper = require('../middleware');
+const cloudinary = require('../utils/cloudinary');
 
 // const getAllBooks = async (req, res, next) => {
 //     const itemPerPage = parseInt(req.query.limit) || 5;
