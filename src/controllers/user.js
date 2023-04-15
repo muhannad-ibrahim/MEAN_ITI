@@ -156,7 +156,7 @@ const login = async (req, res, next) => {
         return res.json({ message: 'error' });
     }
 
-    return res.json({ message: 'success' });
+    return res.json({ message: 'success', token });
 };
 
 const getUserProfile = async (req, res, next) => {
