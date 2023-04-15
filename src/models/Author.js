@@ -1,3 +1,4 @@
+/* eslint-disable radix */
 /* eslint-disable no-unused-vars */
 /* eslint-disable func-names */
 /* eslint-disable no-underscore-dangle */
@@ -33,12 +34,45 @@ const authorSchema = new mongoose.Schema({
     toObject: { virtuals: true },
 });
 
-authorSchema.virtual('authorPopularity').get(async function () {
-    const books = Book.find({ AuthorId: this._id });
-    const popularityScores = (await books).map((book) => book.popularity);
-    const totalPopularity = popularityScores.reduce((a, b) => a + b, 0);
-    return totalPopularity / popularityScores.length;
-});
+// authorSchema.virtual('authorPopularity').get(async function () {
+//     const books = await Book.find({ AuthorId: this._id }).exec();
+//     console.log(this._id);
+//     // console.log(AuthorId);
+//     console.log(books);
+//     const popularityScores = books.map((book) => book.popularity);
+//     const totalPopularity = popularityScores.reduce((a, b) => a + b, 0);
+//     return parseInt(totalPopularity / popularityScores.length);
+// });
+authorSchema.statics.getAuthorsWithPopularity = async function () {
+    const authors = await this.aggregate([
+        {
+            $lookup: {
+                from: 'books',
+                localField: '_id',
+                foreignField: 'AuthorId',
+                as: 'books',
+            },
+        },
+        {
+            $addFields: {
+                totalPopularity: { $sum: '$books.popularity' },
+            },
+        },
+        {
+            $addFields: {
+                authorPopularity: {
+                    $cond: {
+                        if: { $eq: [{ $size: '$books' }, 0] },
+                        then: 0,
+                        else: { $floor: { $divide: ['$totalPopularity', { $size: '$books' }] } },
+                    },
+                },
+            },
+        },
+    ]);
+
+    return authors[0];
+};
 
 authorSchema.plugin(mongoosePagination);
 

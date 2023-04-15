@@ -163,9 +163,13 @@ const deleteAuthorById = async (req, res, next) => {
     return res.json({ message: 'success', data: author });
 };
 
-const popularAuthor = async (req, res) => {
-    const starAuthor = await Author.find().sort({ authorPopularity: 'desc' }).limit(1);
-    res.json(starAuthor);
+const popularAuthor = async (req, res, next) => {
+    try {
+        const author = await Author.getAuthorsWithPopularity();
+        res.status(200).json(author);
+    } catch (err) {
+        next(err);
+    }
 };
 
 module.exports = {
