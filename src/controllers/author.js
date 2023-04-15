@@ -163,6 +163,11 @@ const deleteAuthorById = async (req, res, next) => {
     return res.json({ message: 'success', data: author });
 };
 
+const popularAuthor = async (req, res) => {
+    const starAuthor = await Author.find().sort({ authorPopularity: 'desc' }).limit(1);
+    res.json(starAuthor);
+};
+
 module.exports = {
     getAllAuthors,
     createAuthor,
@@ -171,4 +176,5 @@ module.exports = {
     deleteAuthorById,
     getAuthorsPagination,
     getAllAuthorsBooks,
+    popularAuthor,
 };
