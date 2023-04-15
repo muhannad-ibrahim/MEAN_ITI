@@ -153,7 +153,7 @@ const login = async (req, res, next) => {
     try {
         res.cookie('jwt', token, { httpOnly: true, secure: true, maxAge: 1000 * 60 * 60 * 4 });
     } catch (error) {
-        return next(error);
+        return res.json({ message: 'error' });
     }
 
     return res.json({ message: 'success' });
