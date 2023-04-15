@@ -23,10 +23,12 @@ const port = process.env.PORT;
 const app = express();
 
 // Middleware for CORS policy
-const corsOptions = {
+// const corsOptions = {
+//     origin: ['https://endless-books.netlify.app', 'http://localhost:4200'],
+// };
+app.use(cors({
     origin: ['https://endless-books.netlify.app', 'http://localhost:4200'],
-};
-app.use(cors(corsOptions));
+}));
 
 // Middleware for parsing urlencoded data
 app.use(express.static('images'));
