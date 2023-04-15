@@ -25,7 +25,7 @@ const app = express();
 // Middleware for CORS policy
 const corsOptions = {
     credentials: true,
-    origin: ['https://endlessbooks.netlify.app/', 'http://localhost:4200'],
+    origin: ['https://endless-books.netlify.app/', 'https://endlessbooks.netlify.app/', 'http://localhost:4200'],
 };
 app.use(cors(corsOptions));
 
