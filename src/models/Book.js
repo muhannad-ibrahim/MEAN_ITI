@@ -52,20 +52,24 @@ const bookSchema = new mongoose.Schema(
     },
 );
 
-// bookSchema.methods.calculatePopularity = function () {
-//     if (this.totalRate !== undefined
-//         && this.ratingNumber !== undefined
-//         && this.Interactions !== undefined) {
-//         this.popularity = parseInt((this.totalRate / this.ratingNumber) * this.Interactions, 10);
-//     } else {
-//         console.log('Skipping book because one or more required properties are undefined');
-//     }
-//     return this.save();
-// };
-// bookSchema.virtual('averageRating').get(function () {
-//     this.calculatePopularity();
-//     return this.totalRate / this.ratingNumber;
-// });
+bookSchema.methods.calculatePopularity = function () {
+    if (this.totalRate !== undefined
+        && this.ratingNumber !== undefined
+        && this.Interactions !== undefined) {
+        this.popularity = parseInt((this.totalRate / this.ratingNumber) * this.Interactions, 10);
+    } else {
+        console.log('Skipping book because one or more required properties are undefined');
+    }
+    return this.save();
+};
+bookSchema.pre('save', function (next) {
+    this.calculatePopularity();
+    next();
+});
+
+bookSchema.virtual('averageRating').get(function () {
+    return this.totalRate / this.ratingNumber;
+});
 
 bookSchema.plugin(mongoosePagination);
 
