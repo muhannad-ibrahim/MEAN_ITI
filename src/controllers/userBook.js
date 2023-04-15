@@ -16,7 +16,7 @@ const asyncWrapper = require('../middleware');
 const Book = require('../models/Book');
 const User = require('../models/User');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'test';
+const { JWT_SECRET } = process.env;
 
 // const create = async (req, res, next) => {
 //     const bookId = req.query.id;
@@ -51,6 +51,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'test';
 
 const getUserBooks = async (req, res, next) => {
     const token = req.cookies.jwt;
+    if (!token) {
+        return res.json({ message: 'Error token not found' });
+    }
     const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
     const pageSize = parseInt(req.query.pageSize, 10) || 5;
     let totalPages = 0;
@@ -87,6 +90,9 @@ const getUserBooks = async (req, res, next) => {
 
 const updatePushBook = async (req, res) => {
     const token = req.cookies.jwt;
+    if (!token) {
+        return res.json({ message: 'Error token not found' });
+    }
     const payLoad = jwt.verify(token, process.env.JWT_SECRET);
     const idBook = req.params.id;
     const rateBook = req.body.rate;
@@ -98,8 +104,6 @@ const updatePushBook = async (req, res) => {
     if (!isExist) {
         return res.json({ message: 'Error Book not found' });
     }
-    console.log(idBook);
-    console.log(payLoad.id);
     const addBook = await UserBook.findOneAndUpdate(
         { userId: payLoad.id, 'books.bookId': { $ne: idBook } },
         {
@@ -116,7 +120,6 @@ const updatePushBook = async (req, res) => {
             new: true,
         },
     ).select({ books: { $elemMatch: { bookId: idBook } } });
-    console.log(addBook);
     if (!addBook) {
         const condition = {
             userId: payLoad.id,
@@ -130,7 +133,6 @@ const updatePushBook = async (req, res) => {
             },
         };
         const result = await UserBook.findOneAndUpdate(condition, update).select({ books: { $elemMatch: { bookId: idBook } } });
-        console.log(result);
         if (result) {
             previousRate = result.books[0].rate;
             console.log(previousRate);
@@ -164,6 +166,9 @@ const updateAvgRate = async (idBook, rateBook, previousRate) => {
 
 const deleteBook = async (req, res) => {
     const token = req.cookies.jwt;
+    if (!token) {
+        return res.json({ message: 'Error token not found' });
+    }
     const idBook = req.params.id;
     const payLoad = jwt.verify(token, process.env.JWT_SECRET);
     const prevBook = await UserBook.findOne({ userId: payLoad.id }).select({ books: { $elemMatch: { bookId: idBook } } });
@@ -184,6 +189,9 @@ const deleteBook = async (req, res) => {
 
 const getUserBooksByShelve = async (req, res, next) => {
     const token = req.cookies.jwt;
+    if (!token) {
+        return res.json({ message: 'Error token not found' });
+    }
     const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
     const pageSize = parseInt(req.query.pageSize, 10) || 5;
     let totalPages = 0;
