@@ -29,14 +29,14 @@ const corsOptions = {
 };
 app.use(cookieParser());
 
-// Middleware for sanitizing data against NoSQL query injection
-app.use(mongoSanitize());
+// // Middleware for sanitizing data against NoSQL query injection
+// app.use(mongoSanitize());
 
-// Middleware for setting security HTTP headers
-app.use(helmet());
+// // Middleware for setting security HTTP headers
+// app.use(helmet());
 
-// Prevent http param pollution
-app.use(hpp());
+// // Prevent http param pollution
+// app.use(hpp());
 app.use(cors(corsOptions));
 
 // Middleware for parsing urlencoded data
