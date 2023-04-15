@@ -22,26 +22,6 @@ const getAllAuthors = async (req, res, next) => {
     return res.json({ message: 'success', data: authors });
 };
 
-// const getAuthorsPagination = async (req, res, next) => {
-//     const authorperPage = 5;
-//     const currentPage = parseInt(req.query.page) || 1;
-//     const [error, authors] = await asyncWrapper(Author.paginate({}, { page: currentPage, limit: authorperPage }));
-//     if (error) {
-//         return next(error);
-//     }
-//     if (authors.docs.length === 0) {
-//         return res.status(404).json({ message: 'There are no authors' });
-//     }
-//     return res.json({
-//         message: 'success',
-//         data: authors.docs,
-//         pages: authors.totalPages,
-//         currentPage: authors.page,
-//         nextPage: authors.hasNextPage ? authors.nextPage : null,
-//         prevPage: authors.hasPrevPage ? authors.prevPage : null,
-//     });
-// };
-
 const getAuthorsPagination = async (req, res, next) => {
     const authorsCount = await asyncWrapper(Author.find({}).count());
     const pageNumber = parseInt(req.query.pageNumber, 10) || 0;

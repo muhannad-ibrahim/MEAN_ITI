@@ -1,10 +1,12 @@
 /* eslint-disable no-underscore-dangle */
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
+
 const User = require('../models/User');
-const checkRole = require('../middleware/checkRole');
-const asyncWrapper = require('../middleware');
 const UserBook = require('../models/userBooks');
+
+const asyncWrapper = require('../middleware');
+const checkRole = require('../middleware/checkRole');
 
 const { JWT_SECRET } = process.env;
 
@@ -151,12 +153,12 @@ const login = async (req, res, next) => {
 
     const token = jwt.sign({ email, id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '4h' });
     try {
-        res.cookie('jwt', token, { httpOnly: true, secure: true, maxAge: 1000 * 60 * 60 * 4 });
+        res.cookie('jwt', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 4 });
     } catch (error) {
         return res.json({ message: 'error' });
     }
 
-    return res.json({ message: 'success' });
+    return res.json({ message: 'success', token });
 };
 
 const getUserProfile = async (req, res, next) => {
@@ -192,77 +194,6 @@ const logout = async (req, res) => {
 
 const displayLogoutMessage = async (req, res) => res.send('logout successfully');
 
-const getUserBooks = async (req, res, next) => {
-    const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
-    const pageSize = 5;
-    const token = req.cookies.jwt;
-
-    let decodedToken;
-    try {
-        decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (err) {
-        return res.json({ message: 'invalid token' });
-    }
-    const booksCount = await asyncWrapper(User.findById(decodedToken.id).count());
-    const totalPage = booksCount[1] / pageSize;
-    const totalPages = parseInt(totalPage, 10) + 1;
-    const promise = User
-        .findById(decodedToken.id)
-        .populate({
-            path: 'books.bookId',
-            select: 'name AuthorId photo rating',
-            populate: {
-                path: 'AuthorId',
-                select: 'firstName',
-            },
-        })
-        .skip(pageNumber * pageSize)
-        .limit(pageSize)
-        .exec();
-
-    const [err, users] = await asyncWrapper(promise);
-    if (err) {
-        return next(err);
-    }
-    // return res.json({
-    //     message: 'success',
-    //     data: categories,
-    //     pages: totalPages,
-    // });
-    return res.json({ message: 'success', data: users, pages: totalPages });
-};
-
-const addBookToUser = async (req, res, next) => {
-    const bookId = req.params.id;
-    const token = req.cookies.jwt;
-
-    let decodedToken;
-    try {
-        decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (err) {
-        return res.status(401).send({ message: 'unauthenticated' });
-    }
-
-    const promise = User.findById(decodedToken.id).exec();
-    const [err, user] = await asyncWrapper(promise);
-    if (err) {
-        return next(err);
-    }
-
-    if (!user) {
-        return next({ message: 'User not found' });
-    }
-
-    user.books.push({ bookId });
-    const savePromise = user.save();
-    const [saveErr] = await asyncWrapper(savePromise);
-    if (saveErr) {
-        return next(saveErr);
-    }
-
-    return res.status(200).json({ message: 'Book added to user successfully' });
-};
-
 module.exports = {
     signup,
     getAllUsers,
@@ -273,6 +204,4 @@ module.exports = {
     login,
     logout,
     displayLogoutMessage,
-    getUserBooks,
-    addBookToUser,
 };
