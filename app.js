@@ -27,6 +27,16 @@ const corsOptions = {
     origin: ['https://endless-books.netlify.app', 'http://localhost:4200'],
     credentials: true,
 };
+app.use(cookieParser());
+
+// Middleware for sanitizing data against NoSQL query injection
+app.use(mongoSanitize());
+
+// Middleware for setting security HTTP headers
+app.use(helmet());
+
+// Prevent http param pollution
+app.use(hpp());
 app.use(cors(corsOptions));
 
 // Middleware for parsing urlencoded data
@@ -40,16 +50,6 @@ app.use((err, req, res, next) => res.status(err.statusCode || 400).json(
         message: err.message,
     },
 ));
-app.use(cookieParser());
-
-// Middleware for sanitizing data against NoSQL query injection
-app.use(mongoSanitize());
-
-// Middleware for setting security HTTP headers
-// app.use(helmet());
-
-// Prevent http param pollution
-app.use(hpp());
 
 // Establishing connection with database
 async function main() {
