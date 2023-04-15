@@ -20,7 +20,7 @@ const upload = multer({
 
 router.get('/', bookController.getAllBooks);
 router.post('/', upload.single('photo'), bookController.createBook);
-router.get('/popularity', bookController.popularBook);
+// router.get('/popularity', bookController.popularBook);
 router.get('/:id', bookController.getBookById);
 router.patch('/:id', upload.single('photo'), bookController.updateBookById);
 router.delete('/:id', bookController.deleteBookById);

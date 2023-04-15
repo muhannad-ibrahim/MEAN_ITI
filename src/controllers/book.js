@@ -97,12 +97,18 @@ const createBook = async (req, res, next) => {
 
 const getBookById = async (req, res, next) => {
     const promise = Book.findById(req.params.id);
-    const [err, book] = await asyncWrapper(promise);
-
-    if (err) {
-        return next(err);
+    const [error, book] = await asyncWrapper(promise
+        .populate({
+            path: 'AuthorId',
+            select: 'firstName lastName',
+        })
+        .populate({
+            path: 'categoryId',
+            select: 'name',
+        }));
+    if (error) {
+        return next(error);
     }
-
     return res.json({ message: 'success', book });
 };
 const updateBookById = async (req, res, next) => {
