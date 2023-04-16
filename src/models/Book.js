@@ -57,14 +57,18 @@ bookSchema.methods.calculatePopularity = function () {
         && this.ratingNumber !== undefined
         && this.Interactions !== undefined) {
         this.popularity = parseInt((this.totalRate / this.ratingNumber) * this.Interactions, 10);
+        this.needsSave = true;
     } else {
         console.log('Skipping book because one or more required properties are undefined');
     }
     return this.save();
 };
 bookSchema.pre('save', function (next) {
-    this.calculatePopularity();
-    next();
+    if (this.needsSave) { // Only save if flag is set
+        this.needsSave = false; // Reset flag
+        return next();
+    }
+    return next();
 });
 
 bookSchema.virtual('averageRating').get(function () {

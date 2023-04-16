@@ -10,13 +10,14 @@ const reviewSchemma = new mongoose.Schema({
     comment: {
         type: String,
         required: true,
-
+        default: '',
     },
     rate: {
         type: Number,
         required: true,
         min: 0,
         max: 5,
+        default: 0,
     },
     shelve: {
         type: String,
