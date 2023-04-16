@@ -24,11 +24,11 @@ const getCategoriesPagination = async (req, res, next) => {
     const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
     const pageSize = parseInt(req.query.pageSize, 10) || 5;
     let totalPages = 0;
-    if ((categoriesCount % pageSize) === 0) {
-        const totalPage = categoriesCount / pageSize;
+    if ((categoriesCount[1] % pageSize) === 0) {
+        const totalPage = categoriesCount[1] / pageSize;
         totalPages = parseInt(totalPage, 10);
     } else {
-        const totalPage = categoriesCount / pageSize;
+        const totalPage = categoriesCount[1] / pageSize;
         totalPages = parseInt(totalPage, 10) + 1;
     }
     const [error, categories] = await asyncWrapper(Category

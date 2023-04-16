@@ -13,11 +13,11 @@ const getAllBooks = async (req, res, next) => {
     const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
     const pageSize = parseInt(req.query.pageSize, 10) || 5;
     let totalPages = 0;
-    if ((booksCount % pageSize) === 0) {
-        const totalPage = booksCount / pageSize;
+    if ((booksCount[1] % pageSize) === 0) {
+        const totalPage = booksCount[1] / pageSize;
         totalPages = parseInt(totalPage, 10);
     } else {
-        const totalPage = booksCount / pageSize;
+        const totalPage = booksCount[1] / pageSize;
         totalPages = parseInt(totalPage, 10) + 1;
     }
     const [error, books] = await asyncWrapper(Book
@@ -137,7 +137,6 @@ const deleteBookById = async (req, res, next) => {
     return res.json({ message: 'success', book });
 };
 const popularBook = async (req, res) => {
-    console.log('dddddd');
     try {
         const mostPopularBook = await Book.find({}).sort({ popularity: -1 }).limit(1);
         if (mostPopularBook.length === 0) {

@@ -158,7 +158,6 @@ const updatePushBook = async (req, res) => {
         const result = await UserBook.findOneAndUpdate(condition, update).select({ books: { $elemMatch: { bookId: idBook } } });
         if (result) {
             previousRate = result.books[0].rate;
-            console.log(previousRate);
         }
     }
 
