@@ -21,11 +21,10 @@ const getAllCategories = async (req, res, next) => {
 
 const getCategoriesPagination = async (req, res, next) => {
     const categoriesCount = await asyncWrapper(Category.countDocuments().exec());
-    console.log(categoriesCount);
     const pageNumber = parseInt(req.query.pageNumber, 10) || 0;
     const pageSize = parseInt(req.query.pageSize, 10) || 5;
     let totalPages = 0;
-    if ((categoriesCount % pageSize) === 0) {
+    if ((categoriesCount[1] % pageSize) === 0) {
         const totalPage = categoriesCount[1] / pageSize;
         totalPages = parseInt(totalPage, 10);
     } else {
