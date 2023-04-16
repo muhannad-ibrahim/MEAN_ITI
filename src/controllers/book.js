@@ -137,7 +137,6 @@ const deleteBookById = async (req, res, next) => {
     return res.json({ message: 'success', book });
 };
 const popularBook = async (req, res) => {
-    console.log('dddddd');
     try {
         const mostPopularBook = await Book.find({}).sort({ popularity: -1 }).limit(1);
         if (mostPopularBook.length === 0) {

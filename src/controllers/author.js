@@ -36,7 +36,6 @@ const getAuthorsPagination = async (req, res, next) => {
         const totalPage = authorsCount[1] / pageSize;
         totalPages = parseInt(totalPage, 10) + 1;
     }
-    console.log(totalPages);
     const [error, authors] = await asyncWrapper(Author
         .find()
         .skip((pageNumber) * pageSize)
