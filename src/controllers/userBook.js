@@ -50,7 +50,18 @@ const { JWT_SECRET } = process.env;
 // };
 
 const getUserBooks = async (req, res, next) => {
-    const token = req.cookies.jwt;
+    let token;
+    if (
+        req.headers.authorization
+          && req.headers.authorization.startsWith('Bearer')
+    ) {
+        // eslint-disable-next-line prefer-destructuring
+        token = req.headers.authorization.split(' ')[1];
+    }
+    else {
+        token = req.cookies.jwt;
+    }
+
     if (!token) {
         return res.json({ message: 'Error token not found' });
     }

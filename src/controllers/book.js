@@ -14,10 +14,10 @@ const getAllBooks = async (req, res, next) => {
     const pageSize = parseInt(req.query.pageSize, 10) || 5;
     let totalPages = 0;
     if ((booksCount % pageSize) === 0) {
-        const totalPage = booksCount / pageSize;
+        const totalPage = booksCount[1] / pageSize;
         totalPages = parseInt(totalPage, 10);
     } else {
-        const totalPage = booksCount / pageSize;
+        const totalPage = booksCount[1] / pageSize;
         totalPages = parseInt(totalPage, 10) + 1;
     }
     const [error, books] = await asyncWrapper(Book
