@@ -1,16 +1,17 @@
 # Book Review App
-## This is a book review application inspired by Goodreads.com. Users can sign up, search for books, add books to their shelves, write reviews, and see what others are reading and reviewing.
+### This is a book review application inspired by Goodreads.com. Users can sign up, search for books, add books to their shelves, write reviews, and see what others are reading and reviewing.
+
 
 #### Getting Started
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+    These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 #### Prerequisites
-  Node.js (version 14 or higher)
-  MongoDB (version 4 or higher)
+    Node.js (version 14 or higher)
+    MongoDB (version 4 or higher)
 
 
 #### Clone the repository
-  git clone https://github.com/muhannad-ibrahim/MEAN_ITI.git
+    git clone https://github.com/muhannad-ibrahim/MEAN_ITI.git
 
 #### Install dependencies
     npm install
@@ -27,13 +28,19 @@ Then, open the .env file and replace the values with your own.
 
 
 #### Features
-1- User authentication (sign up, log in, log out)
-2- Category search
-3- Category details (name)
-4- Book search
-5- Book details (description, cover image, reviews, category, author)
-6- User profile (all books, categories and its books, authors and their books)
-7- Admin panel (manage categories, books, authors)
+    1- User authentication (sign up, log in, log out)
+
+    2- Category search
+
+    3- Category details (name)
+
+    4- Book search
+
+    5- Book details (description, cover image, reviews, category, author)
+
+    6- User profile (all books, categories and its books, authors and their books)
+
+    7- Admin panel (manage categories, books, authors)
 
 ### Built With
     Node.js
@@ -45,6 +52,8 @@ Then, open the .env file and replace the values with your own.
  
  
 ### Acknowledgments
-1- Goodreads.com for the inspiration
-2- Open Library API for the book data
-3- Font Awesome for the icons
+    1- Goodreads.com for the inspiration
+
+    2- Open Library API for the book data
+
+    3- Font Awesome for the icons
