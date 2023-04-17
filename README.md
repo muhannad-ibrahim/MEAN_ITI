@@ -1,9 +1,10 @@
-# Book Review App
-### This is a book review application inspired by Goodreads.com. Users can sign up, search for books, add books to their shelves, write reviews, and see what others are reading and reviewing.
+## This is a book review application inspired by Goodreads.com. Users can sign up, search for books, add books to their shelves, write reviews, and see what others are reading and reviewing.
 
 
-#### Getting Started
-    These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+### Getting Started
+**These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.**
+
+<hr>
 
 #### Prerequisites
     Node.js (version 14 or higher)
