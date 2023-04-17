@@ -1,10 +1,10 @@
-## This is a book review application inspired by Goodreads.com. Users can sign up, search for books, add books to their shelves, write reviews, and see what others are reading and reviewing.
-
-
-### Getting Started
-**These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.**
+## Book Review app
+`This is a book review application inspired by Goodreads.com. Users can sign up, search for books, add books to their shelves, write reviews, and see what others are reading and reviewing.`
 
 <hr>
+
+#### Getting Started
+`These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.`
 
 #### Prerequisites
     Node.js (version 14 or higher)
@@ -49,7 +49,7 @@ Then, open the .env file and replace the values with your own.
     MongoDB
     
 ### The frontend app for this api
-[MEAN_ITI_Frontend](https://github.com/omaramgad1/MEAN-Stack-iTi-FrontEnd)
+you can access the frontend app within [MEAN_ITI_Frontend](https://github.com/omaramgad1/MEAN-Stack-iTi-FrontEnd)
  
  
 ### Acknowledgments
